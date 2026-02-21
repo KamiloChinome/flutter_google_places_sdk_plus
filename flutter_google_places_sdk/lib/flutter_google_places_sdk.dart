@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places_sdk_platform_interface/flutter_google_places_sdk_platform_interface.dart';
@@ -56,7 +57,7 @@ class FlutterGooglePlacesSdk {
     final Completer<void> completer = Completer<void>();
     future.whenComplete(completer.complete).catchError((dynamic err) {
       // Ignore if previous call completed with an error.
-      print('FlutterGooglePlacesSdk::call error: $err');
+      log('FlutterGooglePlacesSdk::call error: $err');
       throw err;
     });
     return completer.future;
@@ -71,7 +72,7 @@ class FlutterGooglePlacesSdk {
     return _initialization ??=
         platform.initialize(apiKey, locale: locale, useNewApi: _useNewApi)
           ..catchError((dynamic err) {
-            print('FlutterGooglePlacesSdk::_ensureInitialized error: $err');
+            log('FlutterGooglePlacesSdk::_ensureInitialized error: $err');
             _initialization = null;
           });
   }

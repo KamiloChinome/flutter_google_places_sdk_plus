@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places_sdk_platform_interface/flutter_google_places_sdk_platform_interface.dart'
@@ -8,8 +9,6 @@ import 'package:http/http.dart' as http;
 
 import 'place_parsing.dart';
 import 'types/types.dart';
-
-final _kLogPrefix = 'flutter_google_place_sdk_http_plugin :: WARN -';
 
 /// Http implementation plugin for flutter google places sdk
 class FlutterGooglePlacesSdkHttpPlugin
@@ -153,8 +152,9 @@ class FlutterGooglePlacesSdkHttpPlugin
 
     // -- Location Bias/Restrictions
     if (locationBias != null && locationRestriction != null) {
-      print(
-        '${_kLogPrefix}Only locationBias OR locationRestriction are supported - not both. Using locationRestriction',
+      log(
+        'Only locationBias OR locationRestriction are supported - not both. Using locationRestriction',
+        name: 'flutter_google_places_sdk_http',
       );
     }
 
