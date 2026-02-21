@@ -51,6 +51,5 @@ export 'search_by_text_response.dart';
 export 'search_nearby_response.dart';
 export 'secondary_hours_type.dart';
 export 'spatial_relationship.dart';
-export 'special_day.dart';
 export 'sub_destination.dart';
 export 'time_of_week.dart';
