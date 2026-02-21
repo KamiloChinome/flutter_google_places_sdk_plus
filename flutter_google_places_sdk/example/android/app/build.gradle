@@ -6,7 +6,9 @@ plugins {
 
 def localKeystoreProperties = new Properties()
 def localKeystorePropertiesFile = rootProject.file('C:\\dev\\upload_key\\local-key.properties')
-localKeystoreProperties.load(new FileInputStream(localKeystorePropertiesFile))
+if (localKeystorePropertiesFile.exists()) {
+    localKeystoreProperties.load(new FileInputStream(localKeystorePropertiesFile))
+}
 
 android {
     namespace 'com.msh.flutter_google_places_sdk_example'

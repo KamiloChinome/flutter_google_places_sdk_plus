@@ -1,3 +1,17 @@
+## 0.3.0
+
+* Upgrading `flutter_google_places_sdk_platform_interface` to `0.5.0`
+* Implement `updateSettings` method for runtime API key and locale changes
+* Implement `searchByText` using `GMSPlaceSearchByTextRequest`
+* Implement `searchNearby` using `GMSPlaceSearchNearbyRequest`
+* Fix `placeFieldFromStr()` crash — unsupported fields now return empty `GMSPlaceField()` instead of `fatalError`
+* Add new field mappings: Reviews, PrimaryType, PrimaryTypeDisplayName, ShortFormattedAddress, AccessibilityOptions
+* Serialize all new Place fields in `placeToMap()`: id, displayName, primaryType, primaryTypeDisplayName, shortFormattedAddress, editorialSummary, internationalPhoneNumber, iconBackgroundColor, iconMaskBaseUri, currentOpeningHours, secondaryOpeningHours, reviews, nameLanguageCode, boolean service attributes, and nil placeholders for fields unsupported by iOS SDK
+* Implement `reviewToMap()` and `authorAttributionToMap()` serializers
+* Add authorAttributions, flagContentUri, and googleMapsUri to `photoMetadataToMap()`
+* Update podspec version and metadata
+* Add Swift Package Manager (SPM) support via `Package.swift`
+
 ## 0.2.2
 
 * Upgrading `flutter_google_places_sdk_platform_interface` to `0.3.4`

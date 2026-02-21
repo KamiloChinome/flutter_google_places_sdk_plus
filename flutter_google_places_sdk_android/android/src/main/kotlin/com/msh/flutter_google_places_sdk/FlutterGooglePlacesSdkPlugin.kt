@@ -4,19 +4,29 @@ import android.content.Context
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AccessibilityOptions
 import com.google.android.libraries.places.api.model.AddressComponent
 import com.google.android.libraries.places.api.model.AuthorAttribution
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.CircularBounds
+import com.google.android.libraries.places.api.model.ConnectorAggregation
+import com.google.android.libraries.places.api.model.ContentBlock
+import com.google.android.libraries.places.api.model.EVChargeOptions
+import com.google.android.libraries.places.api.model.FuelOptions
+import com.google.android.libraries.places.api.model.FuelPrice
 import com.google.android.libraries.places.api.model.LocalTime
+import com.google.android.libraries.places.api.model.Money
 import com.google.android.libraries.places.api.model.OpeningHours
+import com.google.android.libraries.places.api.model.ParkingOptions
+import com.google.android.libraries.places.api.model.PaymentOptions
 import com.google.android.libraries.places.api.model.Period
 import com.google.android.libraries.places.api.model.PhotoMetadata
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlusCode
 import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.api.model.Review
+import com.google.android.libraries.places.api.model.SubDestination
 import com.google.android.libraries.places.api.model.TimeOfWeek
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FetchResolvedPhotoUriRequest
@@ -332,9 +342,15 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
     private fun placeFieldFromStr(it: String): Place.Field {
         try {
             return when (it) {
+                // Explicit mappings for fields where Dart name != Android SDK enum name
                 "FormattedAddressAdr" -> Place.Field.ADR_FORMAT_ADDRESS
                 "UtcOffset" -> Place.Field.UTC_OFFSET
                 "Photos" -> Place.Field.PHOTO_METADATAS
+                "IconMaskUrl" -> Place.Field.ICON_MASK_URL
+                "GoogleMapsUri" -> Place.Field.GOOGLE_MAPS_URI
+                "GoogleMapsLinks" -> Place.Field.GOOGLE_MAPS_LINKS
+                "EvChargeOptions" -> Place.Field.EV_CHARGE_OPTIONS
+                "EvChargeAmenitySummary" -> Place.Field.EV_CHARGE_AMENITY_SUMMARY
                 else -> Place.Field.valueOf(it.toScreamingSnakeCase())
             }
         } catch (_: IllegalArgumentException) {
@@ -359,7 +375,8 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             return emptyMap()
         }
 
-        return mapOf(
+        return mapOf<String, Any?>(
+            // ===== Legacy fields =====
             "id" to place.id,
             "address" to place.formattedAddress,
             "addressComponents" to place.addressComponents?.asList()
@@ -380,7 +397,76 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             "utcOffsetMinutes" to place.utcOffsetMinutes,
             "viewport" to latLngBoundsToMap(place.viewport),
             "websiteUri" to place.websiteUri?.toString(),
-            "reviews" to place.reviews?.map { reviewToMap(it) }
+            "reviews" to place.reviews?.map { reviewToMap(it) },
+
+            // ===== New Places API (New) fields =====
+            // Text / LocalizedText fields
+            "displayName" to localizedTextToMap(place.displayName, place.displayNameLanguageCode),
+            "primaryType" to place.primaryType,
+            "primaryTypeDisplayName" to localizedTextToMap(place.primaryTypeDisplayName, place.primaryTypeDisplayNameLanguageCode),
+            "shortFormattedAddress" to place.shortFormattedAddress,
+            "internationalPhoneNumber" to place.internationalPhoneNumber,
+            "nationalPhoneNumber" to place.nationalPhoneNumber,
+            "adrFormatAddress" to place.adrFormatAddress,
+            "editorialSummary" to localizedTextToMap(place.editorialSummary, place.editorialSummaryLanguageCode),
+            "iconBackgroundColor" to place.iconBackgroundColor,
+            "iconMaskBaseUri" to place.iconMaskUrl,
+            "googleMapsUri" to place.googleMapsUri?.toString(),
+            "googleMapsLinks" to googleMapsLinksToMap(place),
+
+            // Temporal fields
+            "timeZone" to null,
+            "currentOpeningHours" to openingHoursToMap(place.currentOpeningHours),
+            "secondaryOpeningHours" to place.secondaryOpeningHours?.map { openingHoursToMap(it) },
+            "currentSecondaryOpeningHours" to place.currentSecondaryOpeningHours?.map { openingHoursToMap(it) },
+
+            // Boolean service attributes
+            "curbsidePickup" to booleanAttributeToValue(place.curbsidePickup),
+            "delivery" to booleanAttributeToValue(place.delivery),
+            "dineIn" to booleanAttributeToValue(place.dineIn),
+            "reservable" to booleanAttributeToValue(place.reservable),
+            "servesBeer" to booleanAttributeToValue(place.servesBeer),
+            "servesBreakfast" to booleanAttributeToValue(place.servesBreakfast),
+            "servesBrunch" to booleanAttributeToValue(place.servesBrunch),
+            "servesDinner" to booleanAttributeToValue(place.servesDinner),
+            "servesLunch" to booleanAttributeToValue(place.servesLunch),
+            "servesVegetarianFood" to booleanAttributeToValue(place.servesVegetarianFood),
+            "servesWine" to booleanAttributeToValue(place.servesWine),
+            "takeout" to booleanAttributeToValue(place.takeout),
+            "servesCocktails" to booleanAttributeToValue(place.servesCocktails),
+            "servesCoffee" to booleanAttributeToValue(place.servesCoffee),
+            "servesDessert" to booleanAttributeToValue(place.servesDessert),
+            "goodForChildren" to booleanAttributeToValue(place.goodForChildren),
+            "allowsDogs" to booleanAttributeToValue(place.allowsDogs),
+            "restroom" to booleanAttributeToValue(place.restroom),
+            "goodForGroups" to booleanAttributeToValue(place.goodForGroups),
+            "goodForWatchingSports" to booleanAttributeToValue(place.goodForWatchingSports),
+            "liveMusic" to booleanAttributeToValue(place.liveMusic),
+            "outdoorSeating" to booleanAttributeToValue(place.outdoorSeating),
+            "menuForChildren" to booleanAttributeToValue(place.menuForChildren),
+            "pureServiceAreaBusiness" to booleanAttributeToValue(place.pureServiceAreaBusiness),
+
+            // Complex option types
+            "accessibilityOptions" to accessibilityOptionsToMap(place.accessibilityOptions),
+            "paymentOptions" to paymentOptionsToMap(place.paymentOptions),
+            "parkingOptions" to parkingOptionsToMap(place.parkingOptions),
+            "evChargeOptions" to evChargeOptionsToMap(place.evChargeOptions),
+            "fuelOptions" to fuelOptionsToMap(place.fuelOptions),
+            "priceRange" to null,
+            "priceLevelNew" to place.priceLevel?.let { priceLevelToString(it) },
+
+            // Summaries & AI content
+            "generativeSummary" to generativeSummaryToMap(place),
+            "reviewSummary" to reviewSummaryToMap(place),
+            "neighborhoodSummary" to neighborhoodSummaryToMap(place),
+            "evChargeAmenitySummary" to evChargeAmenitySummaryToMap(place),
+
+            // Relational data
+            "postalAddress" to null,
+            "subDestinations" to place.subDestinations?.map { subDestinationToMap(it) },
+            "containingPlaces" to null,
+            "addressDescriptor" to null,
+            "consumerAlerts" to place.consumerAlert?.let { listOf(consumerAlertToMap(it)) }
         )
     }
 
@@ -441,7 +527,10 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             "width" to photoMetadata.width,
             "height" to photoMetadata.height,
             "attributions" to photoMetadata.attributions,
-            "photoReference" to photoReference
+            "photoReference" to photoReference,
+            "authorAttributions" to photoMetadata.authorAttributions.asList().map { authorAttributionToMap(it) },
+            "flagContentUri" to null,
+            "googleMapsUri" to null
         )
     }
 
@@ -456,6 +545,224 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
     private fun getPhotoReference(): String {
         val num = runningUid++
         return "id_$num"
+    }
+
+    // ===== Helper to convert BooleanPlaceAttributeValue to Boolean? =====
+
+    private fun booleanAttributeToValue(attr: Place.BooleanPlaceAttributeValue?): Boolean? {
+        return when (attr) {
+            Place.BooleanPlaceAttributeValue.TRUE -> true
+            Place.BooleanPlaceAttributeValue.FALSE -> false
+            else -> null
+        }
+    }
+
+    // ===== New serializer helpers =====
+
+    private fun localizedTextToMap(text: String?, languageCode: String?): Map<String, Any?>? {
+        if (text == null) return null
+        return mapOf(
+            "text" to text,
+            "languageCode" to languageCode
+        )
+    }
+
+    private fun priceLevelToString(priceLevel: Int): String? {
+        return when (priceLevel) {
+            0 -> "PRICE_LEVEL_FREE"
+            1 -> "PRICE_LEVEL_INEXPENSIVE"
+            2 -> "PRICE_LEVEL_MODERATE"
+            3 -> "PRICE_LEVEL_EXPENSIVE"
+            4 -> "PRICE_LEVEL_VERY_EXPENSIVE"
+            else -> null
+        }
+    }
+
+    private fun accessibilityOptionsToMap(options: AccessibilityOptions?): Map<String, Any?>? {
+        if (options == null) return null
+        return mapOf(
+            "wheelchairAccessibleParking" to booleanAttributeToValue(options.wheelchairAccessibleParking),
+            "wheelchairAccessibleEntrance" to booleanAttributeToValue(options.wheelchairAccessibleEntrance),
+            "wheelchairAccessibleRestroom" to booleanAttributeToValue(options.wheelchairAccessibleRestroom),
+            "wheelchairAccessibleSeating" to booleanAttributeToValue(options.wheelchairAccessibleSeating)
+        )
+    }
+
+    private fun paymentOptionsToMap(options: PaymentOptions?): Map<String, Any?>? {
+        if (options == null) return null
+        return mapOf(
+            "acceptsCreditCards" to booleanAttributeToValue(options.acceptsCreditCards),
+            "acceptsDebitCards" to booleanAttributeToValue(options.acceptsDebitCards),
+            "acceptsCashOnly" to booleanAttributeToValue(options.acceptsCashOnly),
+            "acceptsNfc" to booleanAttributeToValue(options.acceptsNfc)
+        )
+    }
+
+    private fun parkingOptionsToMap(options: ParkingOptions?): Map<String, Any?>? {
+        if (options == null) return null
+        return mapOf(
+            "freeParkingLot" to booleanAttributeToValue(options.freeParkingLot),
+            "paidParkingLot" to booleanAttributeToValue(options.paidParkingLot),
+            "freeStreetParking" to booleanAttributeToValue(options.freeStreetParking),
+            "paidStreetParking" to booleanAttributeToValue(options.paidStreetParking),
+            "valetParking" to booleanAttributeToValue(options.valetParking),
+            "freeGarageParking" to booleanAttributeToValue(options.freeGarageParking),
+            "paidGarageParking" to booleanAttributeToValue(options.paidGarageParking)
+        )
+    }
+
+    private fun evChargeOptionsToMap(options: EVChargeOptions?): Map<String, Any?>? {
+        if (options == null) return null
+        return mapOf(
+            "connectorCount" to options.connectorCount,
+            "connectorAggregation" to options.connectorAggregations?.map { connectorAggregationToMap(it) }
+        )
+    }
+
+    private fun connectorAggregationToMap(agg: ConnectorAggregation): Map<String, Any?> {
+        return mapOf(
+            "type" to agg.type?.name,
+            "maxChargeRateKw" to agg.maxChargeRateKw,
+            "count" to agg.count,
+            "availabilityLastUpdateTime" to agg.availabilityLastUpdateTime?.toString(),
+            "availableCount" to agg.availableCount,
+            "outOfServiceCount" to agg.outOfServiceCount
+        )
+    }
+
+    private fun fuelOptionsToMap(options: FuelOptions?): Map<String, Any?>? {
+        if (options == null) return null
+        return mapOf(
+            "fuelPrices" to options.fuelPrices?.map { fuelPriceToMap(it) }
+        )
+    }
+
+    private fun fuelPriceToMap(fuelPrice: FuelPrice): Map<String, Any?> {
+        return mapOf(
+            "type" to fuelPrice.type?.name,
+            "price" to fuelPrice.price?.let { moneyToMap(it) },
+            "updateTime" to fuelPrice.updateTime?.toString()
+        )
+    }
+
+    private fun moneyToMap(money: Money): Map<String, Any?> {
+        return mapOf(
+            "currencyCode" to money.currencyCode,
+            "units" to money.units?.toString(),
+            "nanos" to money.nanos
+        )
+    }
+
+    private fun priceRangeToMap(priceRange: Any?): Map<String, Any?>? {
+        // Place.PriceRange does not exist in Places SDK 5.1.1
+        return null
+    }
+
+    private fun googleMapsLinksToMap(place: Place): Map<String, Any?>? {
+        val links = place.googleMapsLinks ?: return null
+        return mapOf(
+            "directionsUri" to links.directionsUri?.toString(),
+            "placeUri" to links.placeUri?.toString(),
+            "writeAReviewUri" to links.writeAReviewUri?.toString(),
+            "reviewsUri" to links.reviewsUri?.toString(),
+            "photosUri" to links.photosUri?.toString()
+        )
+    }
+
+    private fun generativeSummaryToMap(place: Place): Map<String, Any?>? {
+        val summary = place.generativeSummary ?: return null
+        return mapOf(
+            "overview" to localizedTextToMap(summary.overview, summary.overviewLanguageCode),
+            "overviewFlagContentUri" to summary.flagContentUri?.toString(),
+            "disclosureText" to localizedTextToMap(summary.disclosureText, summary.disclosureTextLanguageCode)
+        )
+    }
+
+    private fun reviewSummaryToMap(place: Place): Map<String, Any?>? {
+        val summary = place.reviewSummary ?: return null
+        return mapOf(
+            "text" to localizedTextToMap(summary.text, summary.textLanguageCode),
+            "flagContentUri" to summary.flagContentUri?.toString(),
+            "disclosureText" to localizedTextToMap(summary.disclosureText, summary.disclosureTextLanguageCode),
+            "reviewsUri" to summary.reviewsUri?.toString()
+        )
+    }
+
+    private fun neighborhoodSummaryToMap(place: Place): Map<String, Any?>? {
+        val summary = place.neighborhoodSummary ?: return null
+        return mapOf(
+            "overview" to contentBlockToMap(summary.overview),
+            "description" to contentBlockToMap(summary.description),
+            "flagContentUri" to summary.flagContentUri?.toString(),
+            "disclosureText" to localizedTextToMap(summary.disclosureText, summary.disclosureTextLanguageCode)
+        )
+    }
+
+    private fun evChargeAmenitySummaryToMap(place: Place): Map<String, Any?>? {
+        val summary = place.evChargeAmenitySummary ?: return null
+        return mapOf(
+            "overview" to contentBlockToMap(summary.overview),
+            "coffee" to contentBlockToMap(summary.coffee),
+            "restaurant" to contentBlockToMap(summary.restaurant),
+            "store" to contentBlockToMap(summary.store),
+            "flagContentUri" to summary.flagContentUri?.toString(),
+            "disclosureText" to localizedTextToMap(summary.disclosureText, summary.disclosureTextLanguageCode)
+        )
+    }
+
+    private fun contentBlockToMap(block: ContentBlock?): Map<String, Any?>? {
+        if (block == null) return null
+        return mapOf(
+            "content" to localizedTextToMap(block.content, block.contentLanguageCode),
+            "referencedPlaces" to block.referencedPlaceIds
+        )
+    }
+
+    private fun postalAddressToMap(address: Any?): Map<String, Any?>? {
+        // Place.PostalAddress does not exist in Places SDK 5.1.1
+        return null
+    }
+
+    private fun subDestinationToMap(sub: SubDestination): Map<String, Any?> {
+        return mapOf(
+            "name" to sub.name,
+            "id" to sub.id
+        )
+    }
+
+    private fun containingPlaceToMap(cp: Any): Map<String, Any?> {
+        // Place.ContainingPlace does not exist in Places SDK 5.1.1
+        return emptyMap()
+    }
+
+    private fun addressDescriptorToMap(descriptor: Any?): Map<String, Any?>? {
+        // Place.AddressDescriptor does not exist in Places SDK 5.1.1
+        return null
+    }
+
+    private fun landmarkToMap(landmark: Any): Map<String, Any?> {
+        // Place.Landmark does not exist in Places SDK 5.1.1
+        return emptyMap()
+    }
+
+    private fun areaToMap(area: Any): Map<String, Any?> {
+        // Place.Area does not exist in Places SDK 5.1.1
+        return emptyMap()
+    }
+
+    private fun consumerAlertToMap(alert: com.google.android.libraries.places.api.model.ConsumerAlert): Map<String, Any?> {
+        return mapOf(
+            "overview" to alert.overview,
+            "details" to alert.details?.let {
+                mapOf(
+                    "title" to it.title,
+                    "description" to it.description,
+                    "aboutLinkTitle" to it.aboutLinkTitle,
+                    "aboutLinkUri" to it.aboutLinkUri?.toString()
+                )
+            },
+            "languageCode" to alert.languageCode
+        )
     }
 
     private fun plusCodeToMap(plusCode: PlusCode?): Map<String, Any?>? {

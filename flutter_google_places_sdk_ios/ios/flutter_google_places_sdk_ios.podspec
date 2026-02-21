@@ -2,16 +2,20 @@
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
 # Run `pod lib lint flutter_google_places_sdk_ios.podspec` to validate before publishing.
 #
+# NOTE: CocoaPods is supported but Swift Package Manager (SPM) is preferred.
+# See Package.swift in this directory for SPM configuration.
+#
 Pod::Spec.new do |s|
   s.name             = 'flutter_google_places_sdk_ios'
-  s.version          = '0.0.3'
-  s.summary          = 'A new flutter plugin project.'
+  s.version          = '0.3.0'
+  s.summary          = 'iOS implementation of the Flutter Google Places SDK plugin.'
   s.description      = <<-DESC
-A new flutter plugin project.
+iOS implementation of the Flutter Google Places SDK plugin, providing access to the
+Google Places API (New) including place details, autocomplete, text search, and nearby search.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/matanshukry/flutter_google_places_sdk/tree/master/flutter_google_places_sdk_ios'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'Matan Shukry' => 'matanshukry@gmail.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
