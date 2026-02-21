@@ -39,7 +39,6 @@ export 'place_field.dart';
 export 'place_local_time.dart';
 export 'place_time_zone.dart';
 export 'place_type.dart';
-export 'place_type_filter.dart';
 export 'plus_code.dart';
 export 'postal_address.dart';
 export 'price_level.dart';

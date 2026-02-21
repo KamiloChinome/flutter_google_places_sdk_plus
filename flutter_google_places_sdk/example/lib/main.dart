@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   //
   String? _predictLastText;
 
-  List<PlaceTypeFilter> _placeTypesFilter = [PlaceTypeFilter.ESTABLISHMENT];
+  List<String> _placeTypesFilter = ['establishment'];
 
   bool _locationBiasEnabled = true;
   LatLngBounds _locationBias = LatLngBounds(
@@ -166,7 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _onPlaceTypeFilterChanged(PlaceTypeFilter? value) {
+  void _onPlaceTypeFilterChanged(String? value) {
     if (value != null) {
       setState(() {
         _placeTypesFilter = [value];
@@ -437,13 +437,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       // -- Place Types
-      DropdownButton<PlaceTypeFilter>(
-        items: PlaceTypeFilter.values
+      DropdownButton<String>(
+        items: const ['address', 'establishment', 'geocode']
             .map(
-              (item) => DropdownMenuItem<PlaceTypeFilter>(
-                child: Text(item.value),
-                value: item,
-              ),
+              (item) =>
+                  DropdownMenuItem<String>(child: Text(item), value: item),
             )
             .toList(growable: false),
         value: _placeTypesFilter.isEmpty ? null : _placeTypesFilter[0],
