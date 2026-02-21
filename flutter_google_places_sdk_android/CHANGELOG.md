@@ -1,3 +1,13 @@
+## 0.4.0
+
+* Upgrading `flutter_google_places_sdk_platform_interface` to `0.5.0`
+* Serialize all new Places API (New) fields in `placeToMap()`: primaryType, primaryTypeDisplayName, shortFormattedAddress, editorialSummary, googleMapsUri, googleMapsLinks, timeZone, postalAddress, currentOpeningHours, secondaryOpeningHours, currentSecondaryOpeningHours, and all boolean service attributes (allowsDogs, goodForChildren, servesCocktails, servesCoffee, servesDessert, restroom, goodForGroups, goodForWatchingSports, liveMusic, outdoorSeating, menuForChildren, pureServiceAreaBusiness)
+* Serialize complex option types: paymentOptions, parkingOptions, evChargeOptions, fuelOptions, accessibilityOptions, priceRange
+* Serialize AI/generative summaries: generativeSummary, reviewSummary, neighborhoodSummary, evChargeAmenitySummary
+* Serialize relational data: subDestinations, containingPlaces, addressDescriptor, consumerAlerts
+* Add authorAttributions, flagContentUri, and googleMapsUri to photoMetadataToMap()
+* Add explicit placeFieldFromStr() mappings for fields with non-standard naming (IconMaskUrl, GoogleMapsUri, GoogleMapsLinks, EvChargeOptions, EvChargeAmenitySummary)
+
 ## 0.3.0
 
 * Upgrading `flutter_google_places_sdk_platform_interface` to `0.4.0`

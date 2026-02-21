@@ -20,3 +20,7 @@
 -dontwarn javax.annotation.**
 -keepnames class io.grpc.** { *; }
 -keep class io.grpc.** { *; }
+
+# Suppress warnings for j2objc annotations (not needed on Android)
+-dontwarn com.google.j2objc.annotations.ReflectionSupport
+-dontwarn com.google.j2objc.annotations.RetainedWith
