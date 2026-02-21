@@ -8,8 +8,8 @@ export 'package:flutter_google_places_sdk_platform_interface/flutter_google_plac
 class FlutterGooglePlacesSdk {
   /// Construct a FlutterGooglePlacesSdk using the specific api key and locale
   FlutterGooglePlacesSdk(this._apiKey, {Locale? locale, bool useNewApi = false})
-      : this._locale = locale,
-        this._useNewApi = useNewApi;
+    : this._locale = locale,
+      this._useNewApi = useNewApi;
 
   /// "Powered by google" image that should be used when background is white
   static const AssetImage ASSET_POWERED_BY_GOOGLE_ON_WHITE =
@@ -101,16 +101,19 @@ class FlutterGooglePlacesSdk {
     LatLngBounds? locationBias,
     LatLngBounds? locationRestriction,
   }) {
-    return _addMethodCall(() => platform.findAutocompletePredictions(
-          query,
-          countries: countries,
-          placeTypesFilter:
-              placeTypesFilter.map((type) => type.apiExpectedValue).toList(),
-          newSessionToken: newSessionToken,
-          origin: origin,
-          locationBias: locationBias,
-          locationRestriction: locationRestriction,
-        ));
+    return _addMethodCall(
+      () => platform.findAutocompletePredictions(
+        query,
+        countries: countries,
+        placeTypesFilter: placeTypesFilter
+            .map((type) => type.apiExpectedValue)
+            .toList(),
+        newSessionToken: newSessionToken,
+        origin: origin,
+        locationBias: locationBias,
+        locationRestriction: locationRestriction,
+      ),
+    );
   }
 
   /// Fetches the details of a place.
@@ -120,8 +123,10 @@ class FlutterGooglePlacesSdk {
   /// Note that different fields can incur different billing.
   ///
   /// For more info about billing: https://developers.google.com/maps/documentation/places/web-service/usage-and-billing
-  Future<FetchPlaceResponse> fetchPlace(String placeId,
-      {required List<PlaceField> fields}) {
+  Future<FetchPlaceResponse> fetchPlace(
+    String placeId, {
+    required List<PlaceField> fields,
+  }) {
     return _addMethodCall(() => platform.fetchPlace(placeId, fields: fields));
   }
 
@@ -131,10 +136,18 @@ class FlutterGooglePlacesSdk {
   /// together with the [PlaceField.PhotoMetadatas] field
   ///
   /// For more info: https://developers.google.com/maps/documentation/places/android-sdk/photos
-  Future<FetchPlacePhotoResponse> fetchPlacePhoto(PhotoMetadata photoMetadata,
-      {int? maxWidth, int? maxHeight}) {
-    return _addMethodCall(() => platform.fetchPlacePhoto(photoMetadata,
-        maxWidth: maxWidth, maxHeight: maxHeight));
+  Future<FetchPlacePhotoResponse> fetchPlacePhoto(
+    PhotoMetadata photoMetadata, {
+    int? maxWidth,
+    int? maxHeight,
+  }) {
+    return _addMethodCall(
+      () => platform.fetchPlacePhoto(
+        photoMetadata,
+        maxWidth: maxWidth,
+        maxHeight: maxHeight,
+      ),
+    );
   }
 
   /// Returns whether or not the client has been initialized.
@@ -142,16 +155,100 @@ class FlutterGooglePlacesSdk {
     return _addMethodCall(platform.isInitialized);
   }
 
+  /// Fetches places based on an ambiguous text query.
+  ///
+  /// Only the requested [fields] will be returned. If none specified,
+  /// all fields will be returned.
+  ///
+  /// Note that different fields can incur different billing.
+  ///
+  /// For more info about billing: https://developers.google.com/maps/documentation/places/android-sdk/usage-and-billing#pricing-new
+  ///
+  /// For more info on text search: https://developers.google.com/maps/documentation/places/android-sdk/text-search
+  Future<SearchByTextResponse> searchByText(
+    String textQuery, {
+    required List<PlaceField> fields,
+    String? includedType,
+    int? maxResultCount,
+    LatLngBounds? locationBias,
+    LatLngBounds? locationRestriction,
+    double? minRating,
+    bool? openNow,
+    List<int>? priceLevels,
+    TextSearchRankPreference? rankPreference,
+    String? regionCode,
+    bool? strictTypeFiltering,
+  }) {
+    return _addMethodCall(
+      () => platform.searchByText(
+        textQuery,
+        fields: fields,
+        includedType: includedType,
+        maxResultCount: maxResultCount,
+        locationBias: locationBias,
+        locationRestriction: locationRestriction,
+        minRating: minRating,
+        openNow: openNow,
+        priceLevels: priceLevels,
+        rankPreference: rankPreference,
+        regionCode: regionCode,
+        strictTypeFiltering: strictTypeFiltering,
+      ),
+    );
+  }
+
+  /// Search for place(s) of interest using a location.
+  ///
+  /// Only the requested [fields] will be returned. If none specified,
+  /// all fields will be returned.
+  ///
+  /// Note that different fields can incur different billing.
+  ///
+  /// For more info on nearby search: https://developers.google.com/maps/documentation/places/android-sdk/nearby-search
+  Future<SearchNearbyResponse> searchNearby({
+    required List<PlaceField> fields,
+    required CircularBounds locationRestriction,
+    List<String>? includedTypes,
+    List<String>? includedPrimaryTypes,
+    List<String>? excludedTypes,
+    List<String>? excludedPrimaryTypes,
+    NearbySearchRankPreference? rankPreference,
+    String? regionCode,
+    int? maxResultCount,
+  }) {
+    return _addMethodCall(
+      () => platform.searchNearby(
+        fields: fields,
+        locationRestriction: locationRestriction,
+        includedTypes: includedTypes,
+        includedPrimaryTypes: includedPrimaryTypes,
+        excludedTypes: excludedTypes,
+        excludedPrimaryTypes: excludedPrimaryTypes,
+        rankPreference: rankPreference,
+        regionCode: regionCode,
+        maxResultCount: maxResultCount,
+      ),
+    );
+  }
+
   /// Updates the settings of the places client with the given API key and locale.
   /// If apiKey is null, the last key will be used.
   /// If locale is null, it will not be updated.
-  Future<void> updateSettings(
-      {String? apiKey, Locale? locale, bool? useNewApi}) {
+  Future<void> updateSettings({
+    String? apiKey,
+    Locale? locale,
+    bool? useNewApi,
+  }) {
     _apiKey = apiKey ?? this.apiKey;
     _locale = locale;
     _useNewApi = useNewApi ?? _useNewApi;
 
-    return _addMethodCall(() => platform.updateSettings(_apiKey,
-        locale: locale, useNewApi: _useNewApi));
+    return _addMethodCall(
+      () => platform.updateSettings(
+        _apiKey,
+        locale: locale,
+        useNewApi: _useNewApi,
+      ),
+    );
   }
 }

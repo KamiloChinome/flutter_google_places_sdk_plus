@@ -16,7 +16,7 @@ import 'package:flutter_google_places_sdk_web/extension.dart' as ext;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:google_maps/google_maps.dart' as core;
 import 'package:google_maps/google_maps_places.dart' as places;
-import 'package:google_maps/google_maps_places.dart';
+import 'package:google_maps/google_maps_places.dart' hide PriceLevel;
 import 'package:web/web.dart' as html;
 
 @JS('initMap')
@@ -50,7 +50,11 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
   }
 
   @override
-  Future<void> initialize(String apiKey, {Locale? locale, bool useNewApi = false}) async {
+  Future<void> initialize(
+    String apiKey, {
+    Locale? locale,
+    bool useNewApi = false,
+  }) async {
     if (_elementInjected) {
       return;
     }
@@ -85,7 +89,11 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
   }
 
   @override
-  Future<void> updateSettings(String apiKey, {Locale? locale, bool? useNewApi}) async {
+  Future<void> updateSettings(
+    String apiKey, {
+    Locale? locale,
+    bool? useNewApi,
+  }) async {
     if (locale != null) {
       _language = locale.languageCode;
     }
@@ -187,6 +195,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
   String? _mapField(PlaceField field) {
     return switch (field) {
       PlaceField.FormattedAddressAdr => 'adrFormatAddress',
+      PlaceField.AdrFormatAddress => 'adrFormatAddress',
       PlaceField.UtcOffset => 'utcOffsetMinutes',
       PlaceField.OpeningHours => 'regularOpeningHours',
       PlaceField.CurrentOpeningHours => 'regularOpeningHours',
@@ -200,6 +209,28 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
       PlaceField.Reservable => 'isReservable',
       PlaceField.Takeout => 'hasTakeout',
       PlaceField.IconMaskUrl => 'svgIconMaskURI',
+      PlaceField.GoogleMapsUri => 'googleMapsURI',
+      PlaceField.GoodForChildren => 'isGoodForChildren',
+      PlaceField.GoodForGroups => 'isGoodForGroups',
+      PlaceField.GoodForWatchingSports => 'isGoodForWatchingSports',
+      PlaceField.Restroom => 'hasRestroom',
+      PlaceField.LiveMusic => 'hasLiveMusic',
+      PlaceField.OutdoorSeating => 'hasOutdoorSeating',
+      PlaceField.MenuForChildren => 'hasMenuForChildren',
+      PlaceField.UserRatingCount => 'userRatingCount',
+      // Fields not available on the JS Places API — return null to skip
+      PlaceField.ShortFormattedAddress => null,
+      PlaceField.TimeZone => null,
+      PlaceField.CurrentSecondaryOpeningHours => null,
+      PlaceField.SubDestinations => null,
+      PlaceField.ContainingPlaces => null,
+      PlaceField.AddressDescriptor => null,
+      PlaceField.GenerativeSummary => null,
+      PlaceField.ReviewSummary => null,
+      PlaceField.NeighborhoodSummary => null,
+      PlaceField.EvChargeAmenitySummary => null,
+      PlaceField.ConsumerAlerts => null,
+      PlaceField.PureServiceAreaBusiness => null,
       _ => _UpperCamelCaseToLowerCamelCase(field.name),
     };
   }
@@ -241,6 +272,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     }
 
     return inter.Place(
+      // ===== Existing (required) fields =====
       id: place.id,
       address: place.formattedAddress,
       addressComponents: place.addressComponents
@@ -253,7 +285,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
       attributions: place.attributions?.cast<String>(),
       latLng: _parseLatLang(place.location),
       name: place.displayName,
-      nameLanguageCode: null,
+      nameLanguageCode: place.displayNameLanguageCode,
       openingHours: _parseOpeningHours(place.openingHours),
       phoneNumber: place.nationalPhoneNumber,
       photoMetadatas: place.photos
@@ -274,8 +306,81 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
       websiteUri: place.websiteURI == null
           ? null
           : Uri.parse(place.websiteURI!),
-      reviews: null,
+      reviews: place.reviews?.map(_parseReview).toList(growable: false),
+      // ===== New Places API fields =====
+      primaryType: place.primaryType,
+      primaryTypeDisplayName: place.primaryTypeDisplayName != null
+          ? inter.LocalizedText(
+              text: place.primaryTypeDisplayName!,
+              languageCode: place.primaryTypeDisplayNameLanguageCode ?? '',
+            )
+          : null,
+      // shortFormattedAddress is not available on the JS Places API
+      internationalPhoneNumber: place.internationalPhoneNumber,
+      nationalPhoneNumber: place.nationalPhoneNumber,
+      adrFormatAddress: place.adrFormatAddress,
+      editorialSummary: place.editorialSummary != null
+          ? inter.LocalizedText(
+              text: place.editorialSummary!,
+              languageCode: place.editorialSummaryLanguageCode ?? '',
+            )
+          : null,
+      iconBackgroundColor: place.iconBackgroundColor,
+      iconMaskBaseUri: place.svgIconMaskURI,
+      googleMapsUri: place.googleMapsURI,
+      // Boolean service attributes
+      curbsidePickup: place.hasCurbsidePickup,
+      delivery: place.hasDelivery,
+      dineIn: place.hasDineIn,
+      reservable: place.isReservable,
+      takeout: place.hasTakeout,
+      servesBeer: place.servesBeer,
+      servesBreakfast: place.servesBreakfast,
+      servesBrunch: place.servesBrunch,
+      servesDinner: place.servesDinner,
+      servesLunch: place.servesLunch,
+      servesVegetarianFood: place.servesVegetarianFood,
+      servesWine: place.servesWine,
+      servesCocktails: place.servesCocktails,
+      servesCoffee: place.servesCoffee,
+      servesDessert: place.servesDessert,
+      goodForChildren: place.isGoodForChildren,
+      allowsDogs: place.allowsDogs,
+      restroom: place.hasRestroom,
+      goodForGroups: place.isGoodForGroups,
+      goodForWatchingSports: place.isGoodForWatchingSports,
+      liveMusic: place.hasLiveMusic,
+      outdoorSeating: place.hasOutdoorSeating,
+      menuForChildren: place.hasMenuForChildren,
     );
+  }
+
+  inter.Review _parseReview(places.Review review) {
+    return inter.Review(
+      attribution: review.text ?? '',
+      authorAttribution: inter.AuthorAttribution(
+        name: review.authorAttribution?.displayName ?? '',
+        photoUri: review.authorAttribution?.photoURI ?? '',
+        uri: review.authorAttribution?.uri ?? '',
+      ),
+      rating: review.rating?.toDouble() ?? 0.0,
+      publishTime: _parseDateToString(review.publishTime),
+      relativePublishTimeDescription:
+          review.relativePublishTimeDescription ?? '',
+      originalText: review.originalText,
+      originalTextLanguageCode: review.originalTextLanguageCode,
+      text: review.text,
+      textLanguageCode: review.textLanguageCode,
+    );
+  }
+
+  /// Converts a JS [Date] to an ISO 8601 string, or returns an empty string.
+  String _parseDateToString(JSObject? date) {
+    if (date == null) {
+      return '';
+    }
+    final result = date.callMethod<JSString>('toISOString'.toJS);
+    return result.toDart;
   }
 
   PlaceType? _parsePlaceType(String? placeType) {
@@ -449,23 +554,180 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
 
     return FetchPlacePhotoResponse.imageUrl(url);
   }
+
+  /// Maps a list of [PlaceField]s to a [JSArray] of JS field-name strings.
+  JSArray<JSString> _mapFields(List<inter.PlaceField> fields) {
+    return fields
+        .map(this._mapField)
+        .nonNulls
+        .toSet() // Distinct
+        .map((str) => str.toJS)
+        .toList(growable: false)
+        .toJS;
+  }
+
+  @override
+  Future<inter.SearchByTextResponse> searchByText(
+    String textQuery, {
+    required List<inter.PlaceField> fields,
+    String? includedType,
+    int? maxResultCount,
+    inter.LatLngBounds? locationBias,
+    inter.LatLngBounds? locationRestriction,
+    double? minRating,
+    bool? openNow,
+    List<int>? priceLevels,
+    inter.TextSearchRankPreference? rankPreference,
+    String? regionCode,
+    bool? strictTypeFiltering,
+  }) async {
+    await _completer;
+
+    final request = SearchByTextRequest(
+      textQuery: textQuery,
+      fields: _mapFields(fields),
+      includedType: includedType,
+      maxResultCount: maxResultCount,
+      locationBias: locationBias != null
+          ? _boundsToWeb(locationBias) as JSAny
+          : null,
+      locationRestriction: locationRestriction != null
+          ? _boundsToWebLiteral(locationRestriction)
+          : null,
+      minRating: minRating,
+      isOpenNow: openNow,
+      priceLevels: priceLevels
+          ?.map(_intToPriceLevel)
+          .nonNulls
+          .toList(growable: false)
+          .toJS,
+      rankPreference: _mapTextRankPreference(rankPreference),
+      region: regionCode,
+      language: _language,
+      useStrictTypeFiltering: strictTypeFiltering,
+    );
+
+    final prom = places.Place.searchByText(request) as JSPromise<JSObject>?;
+    final result = await prom?.toDart;
+    final response = result as ext.SearchPlacesResponse?;
+    final resultPlaces =
+        response?.places.map(_parsePlace).nonNulls.toList(growable: false) ??
+        [];
+    return inter.SearchByTextResponse(resultPlaces);
+  }
+
+  @override
+  Future<inter.SearchNearbyResponse> searchNearby({
+    required List<inter.PlaceField> fields,
+    required inter.CircularBounds locationRestriction,
+    List<String>? includedTypes,
+    List<String>? includedPrimaryTypes,
+    List<String>? excludedTypes,
+    List<String>? excludedPrimaryTypes,
+    inter.NearbySearchRankPreference? rankPreference,
+    String? regionCode,
+    int? maxResultCount,
+  }) async {
+    await _completer;
+
+    final restriction =
+        core.CircleLiteral(
+              center: core.LatLngLiteral(
+                lat: locationRestriction.center.lat,
+                lng: locationRestriction.center.lng,
+              ),
+              radius: locationRestriction.radius,
+            )
+            as JSAny;
+
+    final request = SearchNearbyRequest(
+      locationRestriction: restriction,
+      fields: _mapFields(fields),
+      includedTypes: includedTypes?.map((s) => s.toJS).toList().toJS,
+      includedPrimaryTypes: includedPrimaryTypes
+          ?.map((s) => s.toJS)
+          .toList()
+          .toJS,
+      excludedTypes: excludedTypes?.map((s) => s.toJS).toList().toJS,
+      excludedPrimaryTypes: excludedPrimaryTypes
+          ?.map((s) => s.toJS)
+          .toList()
+          .toJS,
+      rankPreference: _mapNearbyRankPreference(rankPreference),
+      region: regionCode,
+      language: _language,
+      maxResultCount: maxResultCount,
+    );
+
+    final prom = places.Place.searchNearby(request) as JSPromise<JSObject>?;
+    final result = await prom?.toDart;
+    final response = result as ext.SearchPlacesResponse?;
+    final resultPlaces =
+        response?.places.map(_parsePlace).nonNulls.toList(growable: false) ??
+        [];
+    return inter.SearchNearbyResponse(resultPlaces);
+  }
+
+  core.LatLngBoundsLiteral _boundsToWebLiteral(inter.LatLngBounds bounds) {
+    return core.LatLngBoundsLiteral(
+      south: bounds.southwest.lat,
+      west: bounds.southwest.lng,
+      north: bounds.northeast.lat,
+      east: bounds.northeast.lng,
+    );
+  }
+
+  places.PriceLevel? _intToPriceLevel(int level) {
+    return switch (level) {
+      0 => places.PriceLevel.FREE,
+      1 => places.PriceLevel.INEXPENSIVE,
+      2 => places.PriceLevel.MODERATE,
+      3 => places.PriceLevel.EXPENSIVE,
+      4 => places.PriceLevel.VERY_EXPENSIVE,
+      _ => null,
+    };
+  }
+
+  SearchByTextRankPreference? _mapTextRankPreference(
+    inter.TextSearchRankPreference? pref,
+  ) {
+    if (pref == null) return null;
+    return switch (pref) {
+      inter.TextSearchRankPreference.Distance =>
+        SearchByTextRankPreference.DISTANCE,
+      inter.TextSearchRankPreference.Relevance =>
+        SearchByTextRankPreference.RELEVANCE,
+    };
+  }
+
+  SearchNearbyRankPreference? _mapNearbyRankPreference(
+    inter.NearbySearchRankPreference? pref,
+  ) {
+    if (pref == null) return null;
+    return switch (pref) {
+      inter.NearbySearchRankPreference.Distance =>
+        SearchNearbyRankPreference.DISTANCE,
+      inter.NearbySearchRankPreference.Popularity =>
+        SearchNearbyRankPreference.POPULARITY,
+    };
+  }
 }
 
-extension _PriceLevelExtension on PriceLevel {
+extension _PriceLevelExtension on places.PriceLevel {
   int? get toLevelNumber {
-    if (PriceLevel.FREE == this) {
+    if (places.PriceLevel.FREE == this) {
       return 0;
     }
-    if (PriceLevel.INEXPENSIVE == this) {
+    if (places.PriceLevel.INEXPENSIVE == this) {
       return 1;
     }
-    if (PriceLevel.MODERATE == this) {
+    if (places.PriceLevel.MODERATE == this) {
       return 2;
     }
-    if (PriceLevel.EXPENSIVE == this) {
+    if (places.PriceLevel.EXPENSIVE == this) {
       return 3;
     }
-    if (PriceLevel.VERY_EXPENSIVE == this) {
+    if (places.PriceLevel.VERY_EXPENSIVE == this) {
       return 4;
     }
     return null;
