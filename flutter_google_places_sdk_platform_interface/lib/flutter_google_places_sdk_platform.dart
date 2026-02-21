@@ -67,7 +67,7 @@ abstract class FlutterGooglePlacesSdkPlatform extends PlatformInterface {
     Locale? locale,
     bool? useNewApi,
   }) {
-    throw UnimplementedError('initialize() has not been implemented.');
+    throw UnimplementedError('updateSettings() has not been implemented.');
   }
 
   /// Fetches autocomplete predictions based on a query.
@@ -119,7 +119,7 @@ abstract class FlutterGooglePlacesSdkPlatform extends PlatformInterface {
   /// Fetches a photo of a place.
   ///
   /// Before fetching a place photo the place it self must be fetched,
-  /// together with the [PlaceField.PhotoMetadatas] field
+  /// together with the [PlaceField.Photos] field
   ///
   /// For more info: https://developers.google.com/maps/documentation/places/android-sdk/photos
   Future<FetchPlacePhotoResponse> fetchPlacePhoto(
