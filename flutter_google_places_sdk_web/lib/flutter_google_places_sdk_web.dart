@@ -30,7 +30,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     FlutterGooglePlacesSdkPlatform.instance = FlutterGooglePlacesSdkWebPlugin();
   }
 
-  static const _SCRIPT_ID = 'flutter_google_places_sdk_web_script_id';
+  static const _scriptId = 'flutter_google_places_sdk_web_script_id';
 
   Completer? _completer;
 
@@ -65,7 +65,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     _initMap = _doInit.toJS;
 
     html.Element? scriptExist = html.window.document.querySelector(
-      '#$_SCRIPT_ID',
+      '#$_scriptId',
     );
     if (scriptExist != null) {
       _doInit();
@@ -78,7 +78,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
       }
       body.append(
         html.HTMLScriptElement()
-          ..id = _SCRIPT_ID
+          ..id = _scriptId
           ..src = src
           ..async = true
           ..type = 'application/javascript',
@@ -167,14 +167,14 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     if (prediction == null) {
       return null;
     }
-    var main_text = prediction.mainText?.text ?? '';
-    var secondary_text = prediction.secondaryText?.text ?? '';
+    var mainText = prediction.mainText?.text ?? '';
+    var secondaryText = prediction.secondaryText?.text ?? '';
     return inter.AutocompletePrediction(
       distanceMeters: prediction.distanceMeters?.toInt() ?? 0,
       placeId: prediction.placeId,
-      primaryText: main_text,
-      secondaryText: secondary_text,
-      fullText: '$main_text, $secondary_text',
+      primaryText: mainText,
+      secondaryText: secondaryText,
+      fullText: '$mainText, $secondaryText',
     );
   }
 
@@ -230,11 +230,11 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
       PlaceField.EvChargeAmenitySummary => null,
       PlaceField.ConsumerAlerts => null,
       PlaceField.PureServiceAreaBusiness => null,
-      _ => _UpperCamelCaseToLowerCamelCase(field.name),
+      _ => _upperCamelCaseToLowerCamelCase(field.name),
     };
   }
 
-  String _UpperCamelCaseToLowerCamelCase(String name) {
+  String _upperCamelCaseToLowerCamelCase(String name) {
     final first = name[0].toLowerCase();
     final rest = name.substring(1);
     return first + rest;

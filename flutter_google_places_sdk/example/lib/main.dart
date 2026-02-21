@@ -491,7 +491,7 @@ class _MyHomePageState extends State<MyHomePage> {
             .map(_buildPredictionItem)
             .toList(growable: false),
       ),
-      Image(image: FlutterGooglePlacesSdk.ASSET_POWERED_BY_GOOGLE_ON_WHITE),
+      Image(image: FlutterGooglePlacesSdk.assetPoweredByGoogleOnWhite),
     ];
   }
 

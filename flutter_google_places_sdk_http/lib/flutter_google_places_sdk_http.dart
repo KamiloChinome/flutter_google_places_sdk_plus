@@ -14,9 +14,9 @@ final _kLogPrefix = 'flutter_google_place_sdk_http_plugin :: WARN -';
 /// Http implementation plugin for flutter google places sdk
 class FlutterGooglePlacesSdkHttpPlugin
     extends inter.FlutterGooglePlacesSdkPlatform {
-  static const _kAPI_HOST_V2 = 'https://places.googleapis.com';
-  static const _kAPI_PLACES_V2 = '${_kAPI_HOST_V2}/v1/places:autocomplete';
-  static const _kAPI_PLACE_DETAILS_V2 = '${_kAPI_HOST_V2}/v1/places';
+  static const _kApiHostV2 = 'https://places.googleapis.com';
+  static const _kApiPlacesV2 = '${_kApiHostV2}/v1/places:autocomplete';
+  static const _kApiPlaceDetailsV2 = '${_kApiHostV2}/v1/places';
 
   String? _apiKey;
   Locale? _locale;
@@ -112,7 +112,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     final bodyJson = jsonEncode(body);
 
     return _doPost(
-      _kAPI_PLACES_V2,
+      _kApiPlacesV2,
       bodyJson,
       (json) => PlacesAutocompleteResponse.fromJson(json),
       headers: headers,
@@ -175,7 +175,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     };
 
     final langCode = _locale?.languageCode;
-    final uri = Uri.parse('$_kAPI_PLACE_DETAILS_V2/$placeId').replace(
+    final uri = Uri.parse('$_kApiPlaceDetailsV2/$placeId').replace(
       queryParameters: {
         if (langCode != null) 'languageCode': langCode,
         if (regionCode != null) 'regionCode': regionCode,
@@ -211,7 +211,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     };
 
     final uri = Uri.parse(
-      '$_kAPI_HOST_V2/v1/$photoName/media',
+      '$_kApiHostV2/v1/$photoName/media',
     ).replace(queryParameters: queryParams);
 
     final response = await http.get(uri);
@@ -264,7 +264,7 @@ class FlutterGooglePlacesSdkHttpPlugin
       strictTypeFiltering: strictTypeFiltering,
     );
 
-    final url = '$_kAPI_HOST_V2/v1/places:searchText';
+    final url = '$_kApiHostV2/v1/places:searchText';
     final json = await _doPost(
       url,
       jsonEncode(body),
@@ -378,7 +378,7 @@ class FlutterGooglePlacesSdkHttpPlugin
       maxResultCount: maxResultCount,
     );
 
-    final url = '$_kAPI_HOST_V2/v1/places:searchNearby';
+    final url = '$_kApiHostV2/v1/places:searchNearby';
     final json = await _doPost(
       url,
       jsonEncode(body),
@@ -481,12 +481,12 @@ class FlutterGooglePlacesSdkHttpPlugin
       body: body,
     );
 
-    String? strBody = null;
+    String? strBody;
     String strBodyErr = '';
     try {
       strBody = utf8.decode(response.bodyBytes);
     } catch (err) {
-      strBodyErr = 'Failed decoding body! ' + err.toString();
+      strBodyErr = 'Failed decoding body! $err';
     }
     if (response.statusCode < 200 ||
         response.statusCode >= 300 ||

@@ -8,13 +8,13 @@ abstract class FlutterGooglePlacesSdkPlatform extends PlatformInterface {
   FlutterGooglePlacesSdkPlatform() : super(token: _token);
 
   /// "Powered by google" image that should be used when background is white
-  static const AssetImage ASSET_POWERED_BY_GOOGLE_ON_WHITE = AssetImage(
+  static const AssetImage assetPoweredByGoogleOnWhite = AssetImage(
     'assets/google/powered_by_google_on_white.png',
     package: 'flutter_google_places_sdk_platform_interface',
   );
 
   /// "Powered by google" image that should be used when background is not white
-  static const AssetImage ASSET_POWERED_BY_GOOGLE_ON_NON_WHITE = AssetImage(
+  static const AssetImage assetPoweredByGoogleOnNonWhite = AssetImage(
     'assets/google/powered_by_google_on_non_white.png',
     package: 'flutter_google_places_sdk_platform_interface',
   );

@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_google_places_sdk_platform_interface/flutter_google_places_sdk_platform_interface.dart';
 
-const String _CHANNEL_NAME = 'plugins.msh.com/flutter_google_places_sdk';
+const String _channelName = 'plugins.msh.com/flutter_google_places_sdk';
 
-const MethodChannel _channel = MethodChannel(_CHANNEL_NAME);
+const MethodChannel _channel = MethodChannel(_channelName);
 
 /// An implementation of [FlutterGooglePlacesSdkPlatform] that uses method channels.
 class FlutterGooglePlacesSdkMethodChannel
     extends FlutterGooglePlacesSdkPlatform {
-  static const CHANNEL_NAME = _CHANNEL_NAME;
+  static const channelName = _channelName;
 
   @override
   Future<bool?> isInitialized() {

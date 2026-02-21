@@ -12,12 +12,12 @@ class FlutterGooglePlacesSdk {
       this._useNewApi = useNewApi;
 
   /// "Powered by google" image that should be used when background is white
-  static const AssetImage ASSET_POWERED_BY_GOOGLE_ON_WHITE =
-      FlutterGooglePlacesSdkPlatform.ASSET_POWERED_BY_GOOGLE_ON_WHITE;
+  static const AssetImage assetPoweredByGoogleOnWhite =
+      FlutterGooglePlacesSdkPlatform.assetPoweredByGoogleOnWhite;
 
   /// "Powered by google" image that should be used when background is not white
-  static const AssetImage ASSET_POWERED_BY_GOOGLE_ON_NON_WHITE =
-      FlutterGooglePlacesSdkPlatform.ASSET_POWERED_BY_GOOGLE_ON_NON_WHITE;
+  static const AssetImage assetPoweredByGoogleOnNonWhite =
+      FlutterGooglePlacesSdkPlatform.assetPoweredByGoogleOnNonWhite;
 
   /// Singleton instance to the platform
   static FlutterGooglePlacesSdkPlatform platform =

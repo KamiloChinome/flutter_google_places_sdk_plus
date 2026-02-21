@@ -8,7 +8,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   const channel = MethodChannel(
-    FlutterGooglePlacesSdkMethodChannel.CHANNEL_NAME,
+    FlutterGooglePlacesSdkMethodChannel.channelName,
   );
 
   final List<MethodCall> log = <MethodCall>[];
