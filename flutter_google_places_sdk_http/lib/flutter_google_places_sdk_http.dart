@@ -239,7 +239,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     inter.LatLngBounds? locationRestriction,
     double? minRating,
     bool? openNow,
-    List<int>? priceLevels,
+    List<inter.PriceLevel>? priceLevels,
     inter.TextSearchRankPreference? rankPreference,
     String? regionCode,
     bool? strictTypeFiltering,
@@ -284,7 +284,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     inter.LatLngBounds? locationRestriction,
     double? minRating,
     bool? openNow,
-    List<int>? priceLevels,
+    List<inter.PriceLevel>? priceLevels,
     inter.TextSearchRankPreference? rankPreference,
     String? regionCode,
     bool? strictTypeFiltering,
@@ -310,7 +310,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     }
 
     if (priceLevels != null && priceLevels.isNotEmpty) {
-      data['priceLevels'] = priceLevels.map(_intToPriceLevel).toList();
+      data['priceLevels'] = priceLevels.map(_priceLevelToApiString).toList();
     }
 
     if (locationBias != null) {
@@ -338,14 +338,14 @@ class FlutterGooglePlacesSdkHttpPlugin
     };
   }
 
-  String _intToPriceLevel(int level) {
+  String _priceLevelToApiString(inter.PriceLevel level) {
     return switch (level) {
-      0 => 'PRICE_LEVEL_FREE',
-      1 => 'PRICE_LEVEL_INEXPENSIVE',
-      2 => 'PRICE_LEVEL_MODERATE',
-      3 => 'PRICE_LEVEL_EXPENSIVE',
-      4 => 'PRICE_LEVEL_VERY_EXPENSIVE',
-      _ => 'PRICE_LEVEL_UNSPECIFIED',
+      inter.PriceLevel.priceLevelFree => 'PRICE_LEVEL_FREE',
+      inter.PriceLevel.priceLevelInexpensive => 'PRICE_LEVEL_INEXPENSIVE',
+      inter.PriceLevel.priceLevelModerate => 'PRICE_LEVEL_MODERATE',
+      inter.PriceLevel.priceLevelExpensive => 'PRICE_LEVEL_EXPENSIVE',
+      inter.PriceLevel.priceLevelVeryExpensive => 'PRICE_LEVEL_VERY_EXPENSIVE',
+      inter.PriceLevel.priceLevelUnspecified => 'PRICE_LEVEL_UNSPECIFIED',
     };
   }
 

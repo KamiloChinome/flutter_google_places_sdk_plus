@@ -19,7 +19,11 @@ class FlutterGooglePlacesSdkMethodChannel
   }
 
   @override
-  Future<void> initialize(String apiKey, {Locale? locale, bool useNewApi = false}) {
+  Future<void> initialize(
+    String apiKey, {
+    Locale? locale,
+    bool useNewApi = false,
+  }) {
     return _invokeForSettings('initialize', apiKey, locale, useNewApi);
   }
 
@@ -161,7 +165,7 @@ class FlutterGooglePlacesSdkMethodChannel
     LatLngBounds? locationRestriction,
     double? minRating,
     bool? openNow,
-    List<int>? priceLevels,
+    List<PriceLevel>? priceLevels,
     TextSearchRankPreference? rankPreference,
     String? regionCode,
     bool? strictTypeFiltering,
@@ -179,7 +183,7 @@ class FlutterGooglePlacesSdkMethodChannel
           'locationRestriction': locationRestriction?.toJson(),
           'minRating': minRating,
           'openNow': openNow,
-          'priceLevels': priceLevels,
+          'priceLevels': priceLevels?.map((e) => e.name).toList(),
           'rankPreference': rankPreference?.value,
           'regionCode': regionCode,
           'strictTypeFiltering': strictTypeFiltering,

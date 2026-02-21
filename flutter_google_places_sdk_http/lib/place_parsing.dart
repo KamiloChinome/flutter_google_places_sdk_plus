@@ -10,7 +10,6 @@ String placeFieldToApiName(inter.PlaceField field) {
     inter.PlaceField.Id => 'id',
     inter.PlaceField.DisplayName => 'displayName',
     inter.PlaceField.FormattedAddress => 'formattedAddress',
-    inter.PlaceField.FormattedAddressAdr => 'adrFormatAddress',
     inter.PlaceField.AdrFormatAddress => 'adrFormatAddress',
     inter.PlaceField.AddressComponents => 'addressComponents',
     inter.PlaceField.BusinessStatus => 'businessStatus',
@@ -115,7 +114,7 @@ inter.Place parsePlaceFromJson(Map<String, Object?> json) {
     phoneNumber: json['nationalPhoneNumber'] as String?,
     photoMetadatas: _parsePhotos(json['photos']),
     plusCode: _parsePlusCode(json['plusCode'] as Map<String, Object?>?),
-    priceLevel: _parsePriceLevelInt(json['priceLevel'] as String?),
+    priceLevel: _parsePriceLevel(json['priceLevel'] as String?),
     rating: (json['rating'] as num?)?.toDouble(),
     types: _parseTypes(json['types']),
     userRatingsTotal: (json['userRatingCount'] as num?)?.toInt(),
@@ -295,16 +294,13 @@ inter.PlusCode? _parsePlusCode(Map<String, Object?>? data) {
   );
 }
 
-int? _parsePriceLevelInt(String? priceLevel) {
+inter.PriceLevel? _parsePriceLevel(String? priceLevel) {
   if (priceLevel == null) return null;
-  return switch (priceLevel) {
-    'PRICE_LEVEL_FREE' => 0,
-    'PRICE_LEVEL_INEXPENSIVE' => 1,
-    'PRICE_LEVEL_MODERATE' => 2,
-    'PRICE_LEVEL_EXPENSIVE' => 3,
-    'PRICE_LEVEL_VERY_EXPENSIVE' => 4,
-    _ => null,
-  };
+  try {
+    return inter.PriceLevel.fromJson(priceLevel);
+  } catch (_) {
+    return null;
+  }
 }
 
 List<inter.PlaceType>? _parseTypes(Object? data) {

@@ -194,7 +194,6 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
 
   String? _mapField(PlaceField field) {
     return switch (field) {
-      PlaceField.FormattedAddressAdr => 'adrFormatAddress',
       PlaceField.AdrFormatAddress => 'adrFormatAddress',
       PlaceField.UtcOffset => 'utcOffsetMinutes',
       PlaceField.OpeningHours => 'regularOpeningHours',
@@ -293,7 +292,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
           .cast<PhotoMetadata>()
           .toList(growable: false),
       plusCode: _parsePlusCode(place.plusCode),
-      priceLevel: place.priceLevel?.toLevelNumber,
+      priceLevel: _webPriceLevelToInterPriceLevel(place.priceLevel),
       rating: place.rating?.toDouble(),
       types: place.types
           ?.map(_parsePlaceType)
@@ -576,7 +575,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     inter.LatLngBounds? locationRestriction,
     double? minRating,
     bool? openNow,
-    List<int>? priceLevels,
+    List<inter.PriceLevel>? priceLevels,
     inter.TextSearchRankPreference? rankPreference,
     String? regionCode,
     bool? strictTypeFiltering,
@@ -597,7 +596,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
       minRating: minRating,
       isOpenNow: openNow,
       priceLevels: priceLevels
-          ?.map(_intToPriceLevel)
+          ?.map(_interPriceLevelToWebPriceLevel)
           .nonNulls
           .toList(growable: false)
           .toJS,
@@ -677,14 +676,42 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     );
   }
 
-  places.PriceLevel? _intToPriceLevel(int level) {
+  /// Converts a JS Places API [places.PriceLevel] to our platform interface
+  /// [inter.PriceLevel].
+  ///
+  /// Uses if-else chains because JS interop values are not Dart constants
+  /// and cannot be used in switch pattern matching.
+  inter.PriceLevel? _webPriceLevelToInterPriceLevel(places.PriceLevel? level) {
+    if (level == null) return null;
+    if (places.PriceLevel.FREE == level) {
+      return inter.PriceLevel.priceLevelFree;
+    }
+    if (places.PriceLevel.INEXPENSIVE == level) {
+      return inter.PriceLevel.priceLevelInexpensive;
+    }
+    if (places.PriceLevel.MODERATE == level) {
+      return inter.PriceLevel.priceLevelModerate;
+    }
+    if (places.PriceLevel.EXPENSIVE == level) {
+      return inter.PriceLevel.priceLevelExpensive;
+    }
+    if (places.PriceLevel.VERY_EXPENSIVE == level) {
+      return inter.PriceLevel.priceLevelVeryExpensive;
+    }
+    return null;
+  }
+
+  /// Converts our platform interface [inter.PriceLevel] to a JS Places API
+  /// [places.PriceLevel].
+  places.PriceLevel? _interPriceLevelToWebPriceLevel(inter.PriceLevel level) {
     return switch (level) {
-      0 => places.PriceLevel.FREE,
-      1 => places.PriceLevel.INEXPENSIVE,
-      2 => places.PriceLevel.MODERATE,
-      3 => places.PriceLevel.EXPENSIVE,
-      4 => places.PriceLevel.VERY_EXPENSIVE,
-      _ => null,
+      inter.PriceLevel.priceLevelFree => places.PriceLevel.FREE,
+      inter.PriceLevel.priceLevelInexpensive => places.PriceLevel.INEXPENSIVE,
+      inter.PriceLevel.priceLevelModerate => places.PriceLevel.MODERATE,
+      inter.PriceLevel.priceLevelExpensive => places.PriceLevel.EXPENSIVE,
+      inter.PriceLevel.priceLevelVeryExpensive =>
+        places.PriceLevel.VERY_EXPENSIVE,
+      inter.PriceLevel.priceLevelUnspecified => null,
     };
   }
 
@@ -710,26 +737,5 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
       inter.NearbySearchRankPreference.Popularity =>
         SearchNearbyRankPreference.POPULARITY,
     };
-  }
-}
-
-extension _PriceLevelExtension on places.PriceLevel {
-  int? get toLevelNumber {
-    if (places.PriceLevel.FREE == this) {
-      return 0;
-    }
-    if (places.PriceLevel.INEXPENSIVE == this) {
-      return 1;
-    }
-    if (places.PriceLevel.MODERATE == this) {
-      return 2;
-    }
-    if (places.PriceLevel.EXPENSIVE == this) {
-      return 3;
-    }
-    if (places.PriceLevel.VERY_EXPENSIVE == this) {
-      return 4;
-    }
-    return null;
   }
 }

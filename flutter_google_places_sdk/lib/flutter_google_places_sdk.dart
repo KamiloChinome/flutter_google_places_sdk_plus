@@ -172,7 +172,7 @@ class FlutterGooglePlacesSdk {
     LatLngBounds? locationRestriction,
     double? minRating,
     bool? openNow,
-    List<int>? priceLevels,
+    List<PriceLevel>? priceLevels,
     TextSearchRankPreference? rankPreference,
     String? regionCode,
     bool? strictTypeFiltering,
