@@ -15,3 +15,15 @@ extension type FetchFieldsResponse._(JSObject _) implements JSObject {
   /// Access the 'place' property as a Place
   external Place get place;
 }
+
+/// Response type of [Place.searchByText] and [Place.searchNearby].
+///
+/// Both static methods return `Promise<{places: Array<Place>}>`.
+@JS()
+extension type SearchPlacesResponse._(JSObject _) implements JSObject {
+  @JS('places')
+  external JSArray<Place>? _places;
+
+  /// The list of places returned by the search.
+  List<Place> get places => _places?.toDart ?? [];
+}
