@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show MethodCall, MethodChannel;
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
@@ -29,26 +31,27 @@ void main() {
     fullText: 'ftext6cad',
   );
 
-  const kPlace = const Place(
-    id: '',
-    latLng: LatLng(lat: 542.13, lng: -32.43),
-    address: '',
+  // Realistic coordinates (Tel Aviv)
+  const kPlace = Place(
+    id: 'ChIJ9UxXEYdLHRUR0jYgVTqNP4o',
+    latLng: LatLng(lat: 32.0853, lng: 34.7818),
+    address: '14 Rothschild Blvd, Tel Aviv, Israel',
     addressComponents: [],
-    businessStatus: null,
+    businessStatus: BusinessStatus.Operational,
     attributions: [],
-    name: '',
+    name: 'Test Place',
     openingHours: null,
-    phoneNumber: '',
+    phoneNumber: '+972-3-123-4567',
     photoMetadatas: [],
     plusCode: null,
     priceLevel: null,
-    rating: null,
+    rating: 4.5,
     types: [],
-    userRatingsTotal: null,
-    utcOffsetMinutes: null,
+    userRatingsTotal: 120,
+    utcOffsetMinutes: 120,
     viewport: null,
     websiteUri: null,
-    nameLanguageCode: '',
+    nameLanguageCode: 'en',
     reviews: [],
   );
 
@@ -95,6 +98,12 @@ void main() {
         kDefaultApiKey,
         locale: kDefaultLocale,
       );
+      log.clear();
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
       log.clear();
     });
 
@@ -158,6 +167,22 @@ void main() {
         ]);
         expect(result, equals(expected));
       });
+
+      test('with locationBias', () async {
+        final locationBias = LatLngBounds(
+          southwest: LatLng(lat: 32.0, lng: 34.0),
+          northeast: LatLng(lat: 33.0, lng: 35.0),
+        );
+        await flutterGooglePlacesSdk.findAutocompletePredictions(
+          'test',
+          locationBias: locationBias,
+        );
+
+        expect(log, hasLength(2));
+        final call = log[1];
+        expect(call.method, 'findAutocompletePredictions');
+        expect(call.arguments['locationBias'], locationBias.toJson());
+      });
     });
 
     group('fetchPlace', () {
@@ -184,6 +209,248 @@ void main() {
 
         final expected = FetchPlaceResponse(kPlace);
         expect(result, equals(expected));
+      });
+    });
+
+    group('fetchPlacePhoto', () {
+      test('returns image from Uint8List response', () async {
+        const photoMetadata = PhotoMetadata(
+          photoReference: 'places/abc/photos/xyz',
+          width: 1920,
+          height: 1080,
+          attributions: 'Test Author',
+        );
+        // Simulate a minimal valid PNG as Uint8List response
+        responses['fetchPlacePhoto'] = Uint8List.fromList([
+          137, 80, 78, 71, 13, 10, 26, 10, // PNG header
+        ]);
+        final result = await flutterGooglePlacesSdk.fetchPlacePhoto(
+          photoMetadata,
+          maxWidth: 800,
+          maxHeight: 600,
+        );
+
+        expect(log, hasLength(2));
+        final call = log[1];
+        expect(call.method, 'fetchPlacePhoto');
+        expect(call.arguments['photoReference'], 'places/abc/photos/xyz');
+        expect(call.arguments['maxWidth'], 800);
+        expect(call.arguments['maxHeight'], 600);
+
+        // Response should be the image variant
+        expect(result, isA<FetchPlacePhotoResponseImage>());
+      });
+
+      test('returns imageUrl from String response', () async {
+        const photoMetadata = PhotoMetadata(
+          photoReference: 'places/abc/photos/xyz',
+          width: 1920,
+          height: 1080,
+          attributions: 'Test Author',
+        );
+        responses['fetchPlacePhoto'] = 'https://example.com/photo.jpg';
+        final result = await flutterGooglePlacesSdk.fetchPlacePhoto(
+          photoMetadata,
+        );
+
+        expect(result, isA<FetchPlacePhotoResponseImageUrl>());
+      });
+    });
+
+    group('searchByText', () {
+      test('sends correct request and parses response', () async {
+        const textQuery = 'restaurants in Tel Aviv';
+        const fields = [PlaceField.Id, PlaceField.DisplayName];
+        responses['searchByText'] = <dynamic>[kPlace.toJson()];
+
+        final result = await flutterGooglePlacesSdk.searchByText(
+          textQuery,
+          fields: fields,
+        );
+
+        expect(log, hasLength(2));
+        final call = log[1];
+        expect(call.method, 'searchByText');
+        expect(call.arguments['textQuery'], textQuery);
+        expect(call.arguments['fields'], fields.map((e) => e.value).toList());
+        expect(call.arguments['includedType'], isNull);
+        expect(call.arguments['maxResultCount'], isNull);
+
+        expect(result.places, hasLength(1));
+        expect(result.places[0].id, kPlace.id);
+      });
+
+      test('sends all optional parameters', () async {
+        const textQuery = 'cafe';
+        const fields = [PlaceField.Id];
+        final locationBias = LatLngBounds(
+          southwest: LatLng(lat: 32.0, lng: 34.0),
+          northeast: LatLng(lat: 33.0, lng: 35.0),
+        );
+        responses['searchByText'] = <dynamic>[];
+
+        await flutterGooglePlacesSdk.searchByText(
+          textQuery,
+          fields: fields,
+          includedType: 'cafe',
+          maxResultCount: 5,
+          locationBias: locationBias,
+          minRating: 4.0,
+          openNow: true,
+          priceLevels: [PriceLevel.priceLevelModerate],
+          rankPreference: TextSearchRankPreference.Distance,
+          regionCode: 'IL',
+          strictTypeFiltering: true,
+        );
+
+        final call = log[1];
+        expect(call.arguments['includedType'], 'cafe');
+        expect(call.arguments['maxResultCount'], 5);
+        expect(call.arguments['locationBias'], locationBias.toJson());
+        expect(call.arguments['minRating'], 4.0);
+        expect(call.arguments['openNow'], true);
+        expect(call.arguments['priceLevels'], [
+          PriceLevel.priceLevelModerate.name,
+        ]);
+        expect(call.arguments['rankPreference'], 'DISTANCE');
+        expect(call.arguments['regionCode'], 'IL');
+        expect(call.arguments['strictTypeFiltering'], true);
+      });
+
+      test('returns empty list when no results', () async {
+        responses['searchByText'] = <dynamic>[];
+        final result = await flutterGooglePlacesSdk.searchByText(
+          'nonexistent place xyz',
+          fields: [PlaceField.Id],
+        );
+
+        expect(result.places, isEmpty);
+      });
+    });
+
+    group('searchNearby', () {
+      test('sends correct request and parses response', () async {
+        const fields = [PlaceField.Id, PlaceField.Location];
+        final locationRestriction = CircularBounds(
+          center: LatLng(lat: 32.0853, lng: 34.7818),
+          radius: 1000.0,
+        );
+        responses['searchNearby'] = <dynamic>[kPlace.toJson()];
+
+        final result = await flutterGooglePlacesSdk.searchNearby(
+          fields: fields,
+          locationRestriction: locationRestriction,
+          includedTypes: ['restaurant'],
+          maxResultCount: 10,
+        );
+
+        expect(log, hasLength(2));
+        final call = log[1];
+        expect(call.method, 'searchNearby');
+        expect(call.arguments['fields'], fields.map((e) => e.value).toList());
+        expect(
+          call.arguments['locationRestriction'],
+          locationRestriction.toJson(),
+        );
+        expect(call.arguments['includedTypes'], ['restaurant']);
+        expect(call.arguments['maxResultCount'], 10);
+
+        expect(result.places, hasLength(1));
+        expect(result.places[0].id, kPlace.id);
+      });
+
+      test('sends all optional parameters', () async {
+        final locationRestriction = CircularBounds(
+          center: LatLng(lat: 32.0853, lng: 34.7818),
+          radius: 500.0,
+        );
+        responses['searchNearby'] = <dynamic>[];
+
+        await flutterGooglePlacesSdk.searchNearby(
+          fields: [PlaceField.Id],
+          locationRestriction: locationRestriction,
+          includedTypes: ['restaurant'],
+          includedPrimaryTypes: ['restaurant'],
+          excludedTypes: ['bar'],
+          excludedPrimaryTypes: ['bar'],
+          rankPreference: NearbySearchRankPreference.Distance,
+          regionCode: 'IL',
+          maxResultCount: 5,
+        );
+
+        final call = log[1];
+        expect(call.arguments['includedTypes'], ['restaurant']);
+        expect(call.arguments['includedPrimaryTypes'], ['restaurant']);
+        expect(call.arguments['excludedTypes'], ['bar']);
+        expect(call.arguments['excludedPrimaryTypes'], ['bar']);
+        expect(call.arguments['rankPreference'], 'DISTANCE');
+        expect(call.arguments['regionCode'], 'IL');
+        expect(call.arguments['maxResultCount'], 5);
+      });
+    });
+
+    group('updateSettings', () {
+      test('updates apiKey and locale', () async {
+        const newApiKey = 'new-api-key';
+        const newLocale = Locale('en', 'US');
+
+        responses['updateSettings'] = null;
+        await flutterGooglePlacesSdk.updateSettings(
+          apiKey: newApiKey,
+          locale: newLocale,
+        );
+
+        expect(log, hasLength(2));
+        final call = log[1];
+        expect(call.method, 'updateSettings');
+        expect(call.arguments['apiKey'], newApiKey);
+        expect(call.arguments['locale'], {
+          'country': newLocale.countryCode,
+          'language': newLocale.languageCode,
+        });
+
+        // Verify internal state was updated
+        expect(flutterGooglePlacesSdk.apiKey, newApiKey);
+        expect(flutterGooglePlacesSdk.locale, newLocale);
+      });
+
+      test('keeps current apiKey when null is passed', () async {
+        responses['updateSettings'] = null;
+        await flutterGooglePlacesSdk.updateSettings(locale: const Locale('fr'));
+
+        final call = log[1];
+        expect(call.arguments['apiKey'], kDefaultApiKey);
+        expect(flutterGooglePlacesSdk.apiKey, kDefaultApiKey);
+      });
+
+      test('updates useNewApi flag', () async {
+        responses['updateSettings'] = null;
+        await flutterGooglePlacesSdk.updateSettings(useNewApi: true);
+
+        final call = log[1];
+        expect(call.arguments['useNewApi'], true);
+      });
+    });
+
+    group('sequential call ordering', () {
+      test('multiple calls are executed in order', () async {
+        responses['isInitialized'] = true;
+        responses['fetchPlace'] = kPlace.toJson();
+
+        final future1 = flutterGooglePlacesSdk.isInitialized();
+        final future2 = flutterGooglePlacesSdk.fetchPlace(
+          'place-id',
+          fields: [PlaceField.Id],
+        );
+
+        await Future.wait([future1, future2]);
+
+        // Both should have completed with initialize only called once
+        // and methods in order
+        final methodNames = log.map((c) => c.method).toList();
+        expect(methodNames[0], 'initialize');
+        expect(methodNames[1], 'isInitialized');
+        expect(methodNames[2], 'fetchPlace');
       });
     });
   });
