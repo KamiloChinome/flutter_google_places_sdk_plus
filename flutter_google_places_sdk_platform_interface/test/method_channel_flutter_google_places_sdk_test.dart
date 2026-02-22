@@ -15,19 +15,17 @@ void main() {
 
     const channel = MethodChannel('plugins.msh.com/flutter_google_places_sdk');
     final List<MethodCall> log = <MethodCall>[];
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      channel,
-      (MethodCall methodCall) async {
-        log.add(methodCall);
-        for (final callback in handlers) {
-          final result = callback(methodCall);
-          if (result != null) {
-            return result;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+          log.add(methodCall);
+          for (final callback in handlers) {
+            final result = callback(methodCall);
+            if (result != null) {
+              return result;
+            }
           }
-        }
-        return null;
-      },
-    );
+          return null;
+        });
 
     final places = FlutterGooglePlacesSdkMethodChannel();
 
@@ -37,36 +35,31 @@ void main() {
 
     test('initialize', () async {
       const testKey = 'my-key';
-      await places.initialize(testKey, locale: const Locale('en'), useNewApi: true);
-      expect(
-        log,
-        <Matcher>[
-          isMethodCall('initialize', arguments: <String, Object>{
-            'apiKey': testKey,
-            'locale': {
-              'country': null,
-              'language': 'en',
-            },
-            'useNewApi': true,
-          })
-        ],
+      await places.initialize(
+        testKey,
+        locale: const Locale('en'),
+        useNewApi: true,
       );
+      expect(log, <Matcher>[
+        isMethodCall(
+          'initialize',
+          arguments: <String, Object>{
+            'apiKey': testKey,
+            'locale': {'country': null, 'language': 'en'},
+            'useNewApi': true,
+          },
+        ),
+      ]);
     });
 
     test('deinitialize', () async {
       await places.deinitialize();
-      expect(
-        log,
-        <Matcher>[isMethodCall('deinitialize', arguments: null)],
-      );
+      expect(log, <Matcher>[isMethodCall('deinitialize', arguments: null)]);
     });
 
     test('isInitialized', () async {
       await places.isInitialized();
-      expect(
-        log,
-        <Matcher>[isMethodCall('isInitialized', arguments: null)],
-      );
+      expect(log, <Matcher>[isMethodCall('isInitialized', arguments: null)]);
     });
 
     test('findAutocompletePredictions', () async {
@@ -74,21 +67,27 @@ void main() {
       const testCountries = ['c1', 'c2'];
       const newSessionToken = true;
       const origin = LatLng(lat: 325.21, lng: -952.52);
-      const locationBias =
-          LatLngBounds(southwest: LatLng(lat: 125.43, lng: 38.32), northeast: LatLng(lat: -38.271, lng: 312.53));
-      const locationRestriction =
-          LatLngBounds(southwest: LatLng(lat: 49.28, lng: 3921.38), northeast: LatLng(lat: 38.64, lng: 23.32));
-      await places.findAutocompletePredictions(testQuery,
-          countries: testCountries,
-          placeTypesFilter: ['(cities)'],
-          newSessionToken: newSessionToken,
-          origin: origin,
-          locationBias: locationBias,
-          locationRestriction: locationRestriction);
-      expect(
-        log,
-        <Matcher>[
-          isMethodCall('findAutocompletePredictions', arguments: <String, Object>{
+      const locationBias = LatLngBounds(
+        southwest: LatLng(lat: 125.43, lng: 38.32),
+        northeast: LatLng(lat: -38.271, lng: 312.53),
+      );
+      const locationRestriction = LatLngBounds(
+        southwest: LatLng(lat: 49.28, lng: 3921.38),
+        northeast: LatLng(lat: 38.64, lng: 23.32),
+      );
+      await places.findAutocompletePredictions(
+        testQuery,
+        countries: testCountries,
+        placeTypesFilter: ['(cities)'],
+        newSessionToken: newSessionToken,
+        origin: origin,
+        locationBias: locationBias,
+        locationRestriction: locationRestriction,
+      );
+      expect(log, <Matcher>[
+        isMethodCall(
+          'findAutocompletePredictions',
+          arguments: <String, Object>{
             'query': testQuery,
             'countries': testCountries,
             'typesFilter': ['(cities)'],
@@ -96,9 +95,9 @@ void main() {
             'origin': origin.toJson(),
             'locationBias': locationBias.toJson(),
             'locationRestriction': locationRestriction.toJson(),
-          })
-        ],
-      );
+          },
+        ),
+      ]);
     });
 
     test('fetchPlace', () async {
@@ -111,17 +110,17 @@ void main() {
         newSessionToken: newSessionToken,
         regionCode: 'us',
       );
-      expect(
-        log,
-        <Matcher>[
-          isMethodCall('fetchPlace', arguments: <String, Object>{
+      expect(log, <Matcher>[
+        isMethodCall(
+          'fetchPlace',
+          arguments: <String, Object>{
             'placeId': placeId,
-            'fields': testFields.map((e) => e.value).toList(growable: false),
+            'fields': testFields.map((e) => e.name).toList(growable: false),
             'newSessionToken': newSessionToken,
             'regionCode': 'us',
-          })
-        ],
-      );
+          },
+        ),
+      ]);
     });
 
     Future<Uint8List> _createImage() async {
@@ -139,7 +138,12 @@ void main() {
 
     test('fetchPlacePhoto', () async {
       const photoRef = 'http://google.com/photo/ref/1';
-      const photoMetadata = PhotoMetadata(photoReference: photoRef, width: 100, height: 100, attributions: 'attr');
+      const photoMetadata = PhotoMetadata(
+        photoReference: photoRef,
+        width: 100,
+        height: 100,
+        attributions: 'attr',
+      );
       const maxWidth = 50;
 
       // Mock
@@ -154,12 +158,16 @@ void main() {
       handlers.add(handler);
       try {
         // call
-        await places.fetchPlacePhoto(photoMetadata, maxWidth: maxWidth, maxHeight: null);
+        await places.fetchPlacePhoto(
+          photoMetadata,
+          maxWidth: maxWidth,
+          maxHeight: null,
+        );
 
-        expect(
-          log,
-          <Matcher>[
-            isMethodCall('fetchPlacePhoto', arguments: <String, Object?>{
+        expect(log, <Matcher>[
+          isMethodCall(
+            'fetchPlacePhoto',
+            arguments: <String, Object?>{
               'photoMetadata': {
                 'photoReference': photoMetadata.photoReference,
                 'width': photoMetadata.width,
@@ -167,9 +175,9 @@ void main() {
               },
               'maxWidth': maxWidth,
               'maxHeight': null,
-            })
-          ],
-        );
+            },
+          ),
+        ]);
       } catch (err) {
         handlers.remove(handler);
       }
@@ -177,10 +185,14 @@ void main() {
 
     test('searchByText', () async {
       const testQuery = 'my-test-query';
-      const locationBias =
-          LatLngBounds(southwest: LatLng(lat: 125.43, lng: 38.32), northeast: LatLng(lat: -38.271, lng: 312.53));
-      const locationRestriction =
-          LatLngBounds(southwest: LatLng(lat: 49.28, lng: 3921.38), northeast: LatLng(lat: 38.64, lng: 23.32));
+      const locationBias = LatLngBounds(
+        southwest: LatLng(lat: 125.43, lng: 38.32),
+        northeast: LatLng(lat: -38.271, lng: 312.53),
+      );
+      const locationRestriction = LatLngBounds(
+        southwest: LatLng(lat: 49.28, lng: 3921.38),
+        northeast: LatLng(lat: 38.64, lng: 23.32),
+      );
       await places.searchByText(
         testQuery,
         fields: [PlaceField.Id, PlaceField.DisplayName],
@@ -191,32 +203,37 @@ void main() {
         maxResultCount: 9,
         locationBias: locationBias,
         locationRestriction: locationRestriction,
-        priceLevels: [1, 2, 3],
+        priceLevels: [
+          PriceLevel.priceLevelInexpensive,
+          PriceLevel.priceLevelModerate,
+          PriceLevel.priceLevelExpensive,
+        ],
         strictTypeFiltering: false,
         includedType: 'test',
       );
-      expect(
-        log,
-        <Matcher>[
-          isMethodCall(
-            'searchByText',
-            arguments: <String, Object>{
-              'textQuery': testQuery,
-              'fields': ['ID', 'NAME'],
-              'includedType': 'test',
-              'maxResultCount': 9,
-              'locationBias': locationBias.toJson(),
-              'locationRestriction': locationRestriction.toJson(),
-              'minRating': 1.0,
-              'openNow': true,
-              'priceLevels': [1, 2, 3],
-              'rankPreference': 'DISTANCE',
-              'regionCode': 'eu',
-              'strictTypeFiltering': false,
-            },
-          )
-        ],
-      );
+      expect(log, <Matcher>[
+        isMethodCall(
+          'searchByText',
+          arguments: <String, Object>{
+            'textQuery': testQuery,
+            'fields': ['ID', 'DISPLAY_NAME'],
+            'includedType': 'test',
+            'maxResultCount': 9,
+            'locationBias': locationBias.toJson(),
+            'locationRestriction': locationRestriction.toJson(),
+            'minRating': 1.0,
+            'openNow': true,
+            'priceLevels': [
+              'priceLevelInexpensive',
+              'priceLevelModerate',
+              'priceLevelExpensive',
+            ],
+            'rankPreference': 'DISTANCE',
+            'regionCode': 'eu',
+            'strictTypeFiltering': false,
+          },
+        ),
+      ]);
     });
 
     test('searchNearby', () async {
@@ -226,35 +243,33 @@ void main() {
         radius: 1000,
       );
       await places.searchNearby(
-          fields: [PlaceField.Id, PlaceField.DisplayName],
-          locationRestriction: locationRestriction,
-          includedTypes: types,
-          includedPrimaryTypes: types,
-          excludedTypes: types,
-          excludedPrimaryTypes: types,
-          rankPreference: NearbySearchRankPreference.Popularity,
-          maxResultCount: 3,
-          regionCode: 'us');
-
-      expect(
-        log,
-        <Matcher>[
-          isMethodCall(
-            'searchNearby',
-            arguments: <String, Object>{
-              'fields': ['ID', 'NAME'],
-              'locationRestriction': locationRestriction.toJson(),
-              'includedTypes': types,
-              'includedPrimaryTypes': types,
-              'excludedTypes': types,
-              'excludedPrimaryTypes': types,
-              'rankPreference': 'POPULARITY',
-              'regionCode': 'us',
-              'maxResultCount': 3,
-            },
-          )
-        ],
+        fields: [PlaceField.Id, PlaceField.DisplayName],
+        locationRestriction: locationRestriction,
+        includedTypes: types,
+        includedPrimaryTypes: types,
+        excludedTypes: types,
+        excludedPrimaryTypes: types,
+        rankPreference: NearbySearchRankPreference.Popularity,
+        maxResultCount: 3,
+        regionCode: 'us',
       );
+
+      expect(log, <Matcher>[
+        isMethodCall(
+          'searchNearby',
+          arguments: <String, Object>{
+            'fields': ['ID', 'DISPLAY_NAME'],
+            'locationRestriction': locationRestriction.toJson(),
+            'includedTypes': types,
+            'includedPrimaryTypes': types,
+            'excludedTypes': types,
+            'excludedPrimaryTypes': types,
+            'rankPreference': 'POPULARITY',
+            'regionCode': 'us',
+            'maxResultCount': 3,
+          },
+        ),
+      ]);
     });
   });
 }

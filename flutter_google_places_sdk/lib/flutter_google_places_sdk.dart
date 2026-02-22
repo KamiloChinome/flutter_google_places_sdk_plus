@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places_sdk_platform_interface/flutter_google_places_sdk_platform_interface.dart';
@@ -12,12 +13,12 @@ class FlutterGooglePlacesSdk {
       this._useNewApi = useNewApi;
 
   /// "Powered by google" image that should be used when background is white
-  static const AssetImage ASSET_POWERED_BY_GOOGLE_ON_WHITE =
-      FlutterGooglePlacesSdkPlatform.ASSET_POWERED_BY_GOOGLE_ON_WHITE;
+  static const AssetImage assetPoweredByGoogleOnWhite =
+      FlutterGooglePlacesSdkPlatform.assetPoweredByGoogleOnWhite;
 
   /// "Powered by google" image that should be used when background is not white
-  static const AssetImage ASSET_POWERED_BY_GOOGLE_ON_NON_WHITE =
-      FlutterGooglePlacesSdkPlatform.ASSET_POWERED_BY_GOOGLE_ON_NON_WHITE;
+  static const AssetImage assetPoweredByGoogleOnNonWhite =
+      FlutterGooglePlacesSdkPlatform.assetPoweredByGoogleOnNonWhite;
 
   /// Singleton instance to the platform
   static FlutterGooglePlacesSdkPlatform platform =
@@ -56,7 +57,7 @@ class FlutterGooglePlacesSdk {
     final Completer<void> completer = Completer<void>();
     future.whenComplete(completer.complete).catchError((dynamic err) {
       // Ignore if previous call completed with an error.
-      print('FlutterGooglePlacesSdk::call error: $err');
+      log('FlutterGooglePlacesSdk::call error: $err');
       throw err;
     });
     return completer.future;
@@ -71,7 +72,7 @@ class FlutterGooglePlacesSdk {
     return _initialization ??=
         platform.initialize(apiKey, locale: locale, useNewApi: _useNewApi)
           ..catchError((dynamic err) {
-            print('FlutterGooglePlacesSdk::_ensureInitialized error: $err');
+            log('FlutterGooglePlacesSdk::_ensureInitialized error: $err');
             _initialization = null;
           });
   }
@@ -95,7 +96,7 @@ class FlutterGooglePlacesSdk {
   Future<FindAutocompletePredictionsResponse> findAutocompletePredictions(
     String query, {
     List<String>? countries,
-    List<PlaceTypeFilter> placeTypesFilter = const [],
+    List<String> placeTypesFilter = const [],
     bool? newSessionToken,
     LatLng? origin,
     LatLngBounds? locationBias,
@@ -105,9 +106,7 @@ class FlutterGooglePlacesSdk {
       () => platform.findAutocompletePredictions(
         query,
         countries: countries,
-        placeTypesFilter: placeTypesFilter
-            .map((type) => type.apiExpectedValue)
-            .toList(),
+        placeTypesFilter: placeTypesFilter,
         newSessionToken: newSessionToken,
         origin: origin,
         locationBias: locationBias,
@@ -133,7 +132,7 @@ class FlutterGooglePlacesSdk {
   /// Fetches a photo of a place.
   ///
   /// Before fetching a place photo the place it self must be fetched,
-  /// together with the [PlaceField.PhotoMetadatas] field
+  /// together with the [PlaceField.Photos] field
   ///
   /// For more info: https://developers.google.com/maps/documentation/places/android-sdk/photos
   Future<FetchPlacePhotoResponse> fetchPlacePhoto(
@@ -174,7 +173,7 @@ class FlutterGooglePlacesSdk {
     LatLngBounds? locationRestriction,
     double? minRating,
     bool? openNow,
-    List<int>? priceLevels,
+    List<PriceLevel>? priceLevels,
     TextSearchRankPreference? rankPreference,
     String? regionCode,
     bool? strictTypeFiltering,

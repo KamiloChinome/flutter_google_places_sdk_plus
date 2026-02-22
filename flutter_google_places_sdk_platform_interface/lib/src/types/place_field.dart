@@ -9,7 +9,6 @@ part 'place_field.g.dart';
 enum PlaceField {
   // ===== Existing fields =====
   FormattedAddress,
-  FormattedAddressAdr,
   AddressComponents,
   BusinessStatus,
   Id,

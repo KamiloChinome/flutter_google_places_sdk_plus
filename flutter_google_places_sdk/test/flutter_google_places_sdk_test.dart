@@ -7,8 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const channel =
-      MethodChannel(FlutterGooglePlacesSdkMethodChannel.CHANNEL_NAME);
+  const channel = MethodChannel(
+    FlutterGooglePlacesSdkMethodChannel.channelName,
+  );
 
   final List<MethodCall> log = <MethodCall>[];
   late FlutterGooglePlacesSdk flutterGooglePlacesSdk;
@@ -54,7 +55,7 @@ void main() {
   final kDefaultResponses = <dynamic, dynamic>{
     'findAutocompletePredictions': <dynamic>[
       kPrediction1.toJson(),
-      kPrediction2.toJson()
+      kPrediction2.toJson(),
     ],
     'fetchPlace': kPlace.toJson(),
   };
@@ -65,28 +66,35 @@ void main() {
   late Map<String, dynamic> responses;
 
   Matcher _getInitializeMatcher() {
-    return isMethodCall('initialize', arguments: {
-      'apiKey': kDefaultApiKey,
-      'locale': <String, dynamic>{
-        'country': kDefaultLocale.countryCode,
-        'language': kDefaultLocale.languageCode,
+    return isMethodCall(
+      'initialize',
+      arguments: {
+        'apiKey': kDefaultApiKey,
+        'locale': <String, dynamic>{
+          'country': kDefaultLocale.countryCode,
+          'language': kDefaultLocale.languageCode,
+        },
+        'useNewApi': false,
       },
-    });
+    );
   }
 
   group('FlutterGooglePlacesSdk', () {
     setUp(() {
       responses = Map<String, dynamic>.from(kDefaultResponses);
-      channel.setMockMethodCallHandler((MethodCall methodCall) {
-        log.add(methodCall);
-        final dynamic response = responses[methodCall.method];
-        if (response != null && response is Exception) {
-          return Future<dynamic>.error('$response');
-        }
-        return Future<dynamic>.value(response);
-      });
-      flutterGooglePlacesSdk =
-          FlutterGooglePlacesSdk(kDefaultApiKey, locale: kDefaultLocale);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) {
+            log.add(methodCall);
+            final dynamic response = responses[methodCall.method];
+            if (response != null && response is Exception) {
+              return Future<dynamic>.error('$response');
+            }
+            return Future<dynamic>.value(response);
+          });
+      flutterGooglePlacesSdk = FlutterGooglePlacesSdk(
+        kDefaultApiKey,
+        locale: kDefaultLocale,
+      );
       log.clear();
     });
 
@@ -97,7 +105,7 @@ void main() {
 
         expect(log, <Matcher>[
           _getInitializeMatcher(),
-          isMethodCall('isInitialized', arguments: null)
+          isMethodCall('isInitialized', arguments: null),
         ]);
         expect(result, isTrue);
       });
@@ -108,7 +116,7 @@ void main() {
 
         expect(log, <Matcher>[
           _getInitializeMatcher(),
-          isMethodCall('isInitialized', arguments: null)
+          isMethodCall('isInitialized', arguments: null),
         ]);
         expect(result, isFalse);
       });
@@ -118,34 +126,36 @@ void main() {
       test('default behavior', () async {
         const queryTest = 'my-query-text';
         const countriesTest = ['c5', 'c32'];
-        const placeTypeFilterTest = [PlaceTypeFilter.ESTABLISHMENT];
+        const placeTypeFilterTest = ['establishment'];
         final origin = LatLng(lat: 32.51, lng: 95.31);
         final result = await flutterGooglePlacesSdk.findAutocompletePredictions(
-            queryTest,
-            countries: countriesTest,
-            placeTypesFilter: placeTypeFilterTest,
-            newSessionToken: false,
-            origin: origin);
-
-        expect(
-          log,
-          <Matcher>[
-            _getInitializeMatcher(),
-            isMethodCall('findAutocompletePredictions',
-                arguments: <String, dynamic>{
-                  'query': queryTest,
-                  'countries': countriesTest,
-                  "typeFilter": "ESTABLISHMENT",
-                  'newSessionToken': false,
-                  'origin': origin.toJson(),
-                  'locationBias': null,
-                  'locationRestriction': null,
-                }),
-          ],
+          queryTest,
+          countries: countriesTest,
+          placeTypesFilter: placeTypeFilterTest,
+          newSessionToken: false,
+          origin: origin,
         );
 
-        final expected =
-            FindAutocompletePredictionsResponse([kPrediction1, kPrediction2]);
+        expect(log, <Matcher>[
+          _getInitializeMatcher(),
+          isMethodCall(
+            'findAutocompletePredictions',
+            arguments: <String, dynamic>{
+              'query': queryTest,
+              'countries': countriesTest,
+              "typesFilter": ['establishment'],
+              'newSessionToken': false,
+              'origin': origin.toJson(),
+              'locationBias': null,
+              'locationRestriction': null,
+            },
+          ),
+        ]);
+
+        final expected = FindAutocompletePredictionsResponse([
+          kPrediction1,
+          kPrediction2,
+        ]);
         expect(result, equals(expected));
       });
     });
@@ -154,20 +164,23 @@ void main() {
       test('default behavior', () async {
         const placeId = 'my-place-id';
         const fields = [PlaceField.Location, PlaceField.PriceLevel];
-        final result =
-            await flutterGooglePlacesSdk.fetchPlace(placeId, fields: fields);
-
-        expect(
-          log,
-          <Matcher>[
-            _getInitializeMatcher(),
-            isMethodCall('fetchPlace', arguments: <String, dynamic>{
-              'placeId': placeId,
-              'fields': fields.map((e) => e..name).toList(growable: false),
-              'newSessionToken': null,
-            }),
-          ],
+        final result = await flutterGooglePlacesSdk.fetchPlace(
+          placeId,
+          fields: fields,
         );
+
+        expect(log, <Matcher>[
+          _getInitializeMatcher(),
+          isMethodCall(
+            'fetchPlace',
+            arguments: <String, dynamic>{
+              'placeId': placeId,
+              'fields': fields.map((e) => e.name).toList(growable: false),
+              'newSessionToken': null,
+              'regionCode': null,
+            },
+          ),
+        ]);
 
         final expected = FetchPlaceResponse(kPlace);
         expect(result, equals(expected));

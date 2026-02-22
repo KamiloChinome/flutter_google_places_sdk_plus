@@ -9,20 +9,23 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   Future<void> _testIcon(WidgetTester tester, AssetImage asset) async {
-    await tester.pumpWidget(Builder(
-      builder: (context) {
-        return MaterialApp(
+    await tester.pumpWidget(
+      Builder(
+        builder: (context) {
+          return MaterialApp(
             home: Image(
-          image: asset,
-          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-            return const Text('completed');
-          },
-          errorBuilder: (context, error, stackTrace) {
-            return Container();
-          },
-        ));
-      },
-    ));
+              image: asset,
+              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                return const Text('completed');
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Container();
+              },
+            ),
+          );
+        },
+      ),
+    );
 
     await tester.pumpAndSettle();
     expect(find.byType(Text), findsOneWidget);
@@ -30,18 +33,24 @@ void main() {
 
   group('$FlutterGooglePlacesSdkPlatform', () {
     test('$FlutterGooglePlacesSdkMethodChannel() is the default instance', () {
-      expect(FlutterGooglePlacesSdkPlatform.instance,
-          isInstanceOf<FlutterGooglePlacesSdkMethodChannel>());
+      expect(
+        FlutterGooglePlacesSdkPlatform.instance,
+        isInstanceOf<FlutterGooglePlacesSdkMethodChannel>(),
+      );
     });
 
     testWidgets('White Asset icon is valid', (WidgetTester tester) async {
-      _testIcon(tester,
-          FlutterGooglePlacesSdkPlatform.ASSET_POWERED_BY_GOOGLE_ON_WHITE);
+      _testIcon(
+        tester,
+        FlutterGooglePlacesSdkPlatform.assetPoweredByGoogleOnWhite,
+      );
     });
 
     testWidgets('Non-White Asset icon is valid', (WidgetTester tester) async {
-      _testIcon(tester,
-          FlutterGooglePlacesSdkPlatform.ASSET_POWERED_BY_GOOGLE_ON_NON_WHITE);
+      _testIcon(
+        tester,
+        FlutterGooglePlacesSdkPlatform.assetPoweredByGoogleOnNonWhite,
+      );
     });
 
     test('Cannot be implemented with `implements`', () {

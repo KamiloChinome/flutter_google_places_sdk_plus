@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places_sdk_platform_interface/flutter_google_places_sdk_platform_interface.dart'
@@ -9,14 +10,12 @@ import 'package:http/http.dart' as http;
 import 'place_parsing.dart';
 import 'types/types.dart';
 
-final _kLogPrefix = 'flutter_google_place_sdk_http_plugin :: WARN -';
-
 /// Http implementation plugin for flutter google places sdk
 class FlutterGooglePlacesSdkHttpPlugin
     extends inter.FlutterGooglePlacesSdkPlatform {
-  static const _kAPI_HOST_V2 = 'https://places.googleapis.com';
-  static const _kAPI_PLACES_V2 = '${_kAPI_HOST_V2}/v1/places:autocomplete';
-  static const _kAPI_PLACE_DETAILS_V2 = '${_kAPI_HOST_V2}/v1/places';
+  static const _kApiHostV2 = 'https://places.googleapis.com';
+  static const _kApiPlacesV2 = '${_kApiHostV2}/v1/places:autocomplete';
+  static const _kApiPlaceDetailsV2 = '${_kApiHostV2}/v1/places';
 
   String? _apiKey;
   Locale? _locale;
@@ -112,7 +111,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     final bodyJson = jsonEncode(body);
 
     return _doPost(
-      _kAPI_PLACES_V2,
+      _kApiPlacesV2,
       bodyJson,
       (json) => PlacesAutocompleteResponse.fromJson(json),
       headers: headers,
@@ -153,8 +152,9 @@ class FlutterGooglePlacesSdkHttpPlugin
 
     // -- Location Bias/Restrictions
     if (locationBias != null && locationRestriction != null) {
-      print(
-        '${_kLogPrefix}Only locationBias OR locationRestriction are supported - not both. Using locationRestriction',
+      log(
+        'Only locationBias OR locationRestriction are supported - not both. Using locationRestriction',
+        name: 'flutter_google_places_sdk_http',
       );
     }
 
@@ -175,7 +175,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     };
 
     final langCode = _locale?.languageCode;
-    final uri = Uri.parse('$_kAPI_PLACE_DETAILS_V2/$placeId').replace(
+    final uri = Uri.parse('$_kApiPlaceDetailsV2/$placeId').replace(
       queryParameters: {
         if (langCode != null) 'languageCode': langCode,
         if (regionCode != null) 'regionCode': regionCode,
@@ -211,7 +211,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     };
 
     final uri = Uri.parse(
-      '$_kAPI_HOST_V2/v1/$photoName/media',
+      '$_kApiHostV2/v1/$photoName/media',
     ).replace(queryParameters: queryParams);
 
     final response = await http.get(uri);
@@ -239,7 +239,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     inter.LatLngBounds? locationRestriction,
     double? minRating,
     bool? openNow,
-    List<int>? priceLevels,
+    List<inter.PriceLevel>? priceLevels,
     inter.TextSearchRankPreference? rankPreference,
     String? regionCode,
     bool? strictTypeFiltering,
@@ -264,7 +264,7 @@ class FlutterGooglePlacesSdkHttpPlugin
       strictTypeFiltering: strictTypeFiltering,
     );
 
-    final url = '$_kAPI_HOST_V2/v1/places:searchText';
+    final url = '$_kApiHostV2/v1/places:searchText';
     final json = await _doPost(
       url,
       jsonEncode(body),
@@ -284,7 +284,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     inter.LatLngBounds? locationRestriction,
     double? minRating,
     bool? openNow,
-    List<int>? priceLevels,
+    List<inter.PriceLevel>? priceLevels,
     inter.TextSearchRankPreference? rankPreference,
     String? regionCode,
     bool? strictTypeFiltering,
@@ -310,7 +310,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     }
 
     if (priceLevels != null && priceLevels.isNotEmpty) {
-      data['priceLevels'] = priceLevels.map(_intToPriceLevel).toList();
+      data['priceLevels'] = priceLevels.map(_priceLevelToApiString).toList();
     }
 
     if (locationBias != null) {
@@ -338,14 +338,14 @@ class FlutterGooglePlacesSdkHttpPlugin
     };
   }
 
-  String _intToPriceLevel(int level) {
+  String _priceLevelToApiString(inter.PriceLevel level) {
     return switch (level) {
-      0 => 'PRICE_LEVEL_FREE',
-      1 => 'PRICE_LEVEL_INEXPENSIVE',
-      2 => 'PRICE_LEVEL_MODERATE',
-      3 => 'PRICE_LEVEL_EXPENSIVE',
-      4 => 'PRICE_LEVEL_VERY_EXPENSIVE',
-      _ => 'PRICE_LEVEL_UNSPECIFIED',
+      inter.PriceLevel.priceLevelFree => 'PRICE_LEVEL_FREE',
+      inter.PriceLevel.priceLevelInexpensive => 'PRICE_LEVEL_INEXPENSIVE',
+      inter.PriceLevel.priceLevelModerate => 'PRICE_LEVEL_MODERATE',
+      inter.PriceLevel.priceLevelExpensive => 'PRICE_LEVEL_EXPENSIVE',
+      inter.PriceLevel.priceLevelVeryExpensive => 'PRICE_LEVEL_VERY_EXPENSIVE',
+      inter.PriceLevel.priceLevelUnspecified => 'PRICE_LEVEL_UNSPECIFIED',
     };
   }
 
@@ -378,7 +378,7 @@ class FlutterGooglePlacesSdkHttpPlugin
       maxResultCount: maxResultCount,
     );
 
-    final url = '$_kAPI_HOST_V2/v1/places:searchNearby';
+    final url = '$_kApiHostV2/v1/places:searchNearby';
     final json = await _doPost(
       url,
       jsonEncode(body),
@@ -481,12 +481,12 @@ class FlutterGooglePlacesSdkHttpPlugin
       body: body,
     );
 
-    String? strBody = null;
+    String? strBody;
     String strBodyErr = '';
     try {
       strBody = utf8.decode(response.bodyBytes);
     } catch (err) {
-      strBodyErr = 'Failed decoding body! ' + err.toString();
+      strBodyErr = 'Failed decoding body! $err';
     }
     if (response.statusCode < 200 ||
         response.statusCode >= 300 ||

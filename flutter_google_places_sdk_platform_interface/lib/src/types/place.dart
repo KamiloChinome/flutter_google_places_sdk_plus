@@ -44,64 +44,61 @@ sealed class Place with _$Place {
     // ===== Existing fields (kept as required for backward compat) =====
 
     /// The unique identifier of a place.
-    required String? id,
+    String? id,
 
     /// A human-readable address for this place.
-    required String? address,
+    String? address,
 
     /// The address components for this place's location.
-    required List<AddressComponent>? addressComponents,
+    List<AddressComponent>? addressComponents,
 
     /// The business status for this place.
-    required BusinessStatus? businessStatus,
+    BusinessStatus? businessStatus,
 
     /// A list of data provider attribution strings.
-    required List<String>? attributions,
+    List<String>? attributions,
 
     /// The location of this place.
-    required LatLng? latLng,
+    LatLng? latLng,
 
     /// The name of this place (based on the locale of the original request).
-    required String? name,
+    String? name,
 
     /// The language code of [name].
-    required String? nameLanguageCode,
+    String? nameLanguageCode,
 
     /// The opening hours for this place.
-    required OpeningHours? openingHours,
+    OpeningHours? openingHours,
 
     /// The phone number in national format.
-    required String? phoneNumber,
+    String? phoneNumber,
 
     /// A list of photos for this place.
-    required List<PhotoMetadata>? photoMetadatas,
+    List<PhotoMetadata>? photoMetadatas,
 
     /// The plus code of this place.
-    required PlusCode? plusCode,
-
-    /// Price level for this place (legacy int representation).
-    required int? priceLevel,
+    PlusCode? plusCode,
 
     /// A rating between 1.0 and 5.0, based on user reviews.
-    required double? rating,
+    double? rating,
 
     /// A list of place types for this place.
-    required List<PlaceType>? types,
+    List<PlaceType>? types,
 
     /// The total number of user ratings for this place.
-    required int? userRatingsTotal,
+    int? userRatingsTotal,
 
     /// The number of minutes this place's current timezone is offset from UTC.
-    required int? utcOffsetMinutes,
+    int? utcOffsetMinutes,
 
     /// A viewport for displaying this place on a map.
-    required LatLngBounds? viewport,
+    LatLngBounds? viewport,
 
     /// The website URI for this place.
-    required Uri? websiteUri,
+    Uri? websiteUri,
 
     /// A list of reviews for this place.
-    required List<Review>? reviews,
+    List<Review>? reviews,
 
     // ===== New Places API (New) fields (all optional) =====
 
@@ -248,8 +245,8 @@ sealed class Place with _$Place {
     /// The place's price range.
     PriceRange? priceRange,
 
-    /// The place's price level (typed enum, from the New API).
-    PriceLevel? priceLevelNew,
+    /// The place's price level.
+    PriceLevel? priceLevel,
 
     // --- Summaries & AI content ---
 
@@ -286,36 +283,4 @@ sealed class Place with _$Place {
 
   /// Parse an [Place] from json.
   factory Place.fromJson(Map<String, Object?> json) => _$PlaceFromJson(json);
-
-  //
-  // static Place fromMap(Map<String, Object> map) => Place(
-  //       address: map['address'],
-  //       addressComponents: map['addressComponents']
-  //           ?.map((entry) =>
-  //               AddressComponent.fromJson(entry.cast<String, Object>()))
-  //           ?.toList()
-  //           ?.cast<AddressComponent>(),
-  //       businessStatus: (map['businessStatus'] as String?)?.toBusinessStatus(),
-  //       attributions: map['attributions']?.cast<String>(),
-  //       latLng: LatLng.fromMap(toJsonMap(map['latLng'])),
-  //       name: map['name'],
-  //       openingHours: OpeningHours.fromMap(toJsonMap(map['openingHours'])),
-  //       phoneNumber: map['phoneNumber'],
-  //       photoMetadatas: map['photoMetadatas']
-  //           ?.map((entry) => PhotoMetadata.fromMap(toJsonMap(entry)))
-  //           ?.toList()
-  //           ?.cast<PhotoMetadata>(),
-  //       plusCode: PlusCode.fromMap(toJsonMap(map['plusCode'])),
-  //       priceLevel: map['priceLevel'],
-  //       rating: map['rating'],
-  //       types: map['types']
-  //           ?.map((entry) => (entry as String?)?.toPlaceType())
-  //           ?.toList()
-  //           ?.cast<PlaceType>(),
-  //       userRatingsTotal: map['userRatingsTotal'],
-  //       utcOffsetMinutes: map['utcOffsetMinutes'],
-  //       viewport: LatLngBounds.fromMap(toJsonMap(map['viewport'])),
-  //       websiteUri:
-  //           map['websiteUri'] == null ? null : Uri.parse(map['websiteUri']),
-  //     );
 }

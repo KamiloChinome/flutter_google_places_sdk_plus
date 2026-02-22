@@ -346,8 +346,7 @@ enum PlaceType {
   WILDLIFE_PARK,
   WILDLIFE_REFUGE,
   WINE_BAR,
-  YOGA_STUDIO,
-  ;
+  YOGA_STUDIO;
 
   factory PlaceType.fromJson(String name) {
     name = name.toLowerCase();
@@ -361,11 +360,11 @@ enum PlaceType {
 }
 
 final placeTypeValuesMap = {
-  for (final placeType in PlaceType.values) placeType.name: placeType
+  for (final placeType in PlaceType.values) placeType.name: placeType,
 };
 
 extension PlaceTypeDescriptor on PlaceType {
-  String get value => toString();
+  String get value => name;
 }
 
 extension PlaceTypeEnumParser on String {

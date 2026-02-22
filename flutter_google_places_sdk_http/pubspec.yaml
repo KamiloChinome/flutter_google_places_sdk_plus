@@ -16,6 +16,10 @@ dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
 
+dependency_overrides:
+  flutter_google_places_sdk_platform_interface:
+    path: ../flutter_google_places_sdk_platform_interface
+
 dev_dependencies:
   json_serializable: ^6.11.2
   build_runner: ^2.10.4

@@ -8,13 +8,13 @@ abstract class FlutterGooglePlacesSdkPlatform extends PlatformInterface {
   FlutterGooglePlacesSdkPlatform() : super(token: _token);
 
   /// "Powered by google" image that should be used when background is white
-  static const AssetImage ASSET_POWERED_BY_GOOGLE_ON_WHITE = AssetImage(
+  static const AssetImage assetPoweredByGoogleOnWhite = AssetImage(
     'assets/google/powered_by_google_on_white.png',
     package: 'flutter_google_places_sdk_platform_interface',
   );
 
   /// "Powered by google" image that should be used when background is not white
-  static const AssetImage ASSET_POWERED_BY_GOOGLE_ON_NON_WHITE = AssetImage(
+  static const AssetImage assetPoweredByGoogleOnNonWhite = AssetImage(
     'assets/google/powered_by_google_on_non_white.png',
     package: 'flutter_google_places_sdk_platform_interface',
   );
@@ -67,7 +67,7 @@ abstract class FlutterGooglePlacesSdkPlatform extends PlatformInterface {
     Locale? locale,
     bool? useNewApi,
   }) {
-    throw UnimplementedError('initialize() has not been implemented.');
+    throw UnimplementedError('updateSettings() has not been implemented.');
   }
 
   /// Fetches autocomplete predictions based on a query.
@@ -119,7 +119,7 @@ abstract class FlutterGooglePlacesSdkPlatform extends PlatformInterface {
   /// Fetches a photo of a place.
   ///
   /// Before fetching a place photo the place it self must be fetched,
-  /// together with the [PlaceField.PhotoMetadatas] field
+  /// together with the [PlaceField.Photos] field
   ///
   /// For more info: https://developers.google.com/maps/documentation/places/android-sdk/photos
   Future<FetchPlacePhotoResponse> fetchPlacePhoto(
@@ -149,7 +149,7 @@ abstract class FlutterGooglePlacesSdkPlatform extends PlatformInterface {
     LatLngBounds? locationRestriction,
     double? minRating,
     bool? openNow,
-    List<int>? priceLevels,
+    List<PriceLevel>? priceLevels,
     TextSearchRankPreference? rankPreference,
     String? regionCode,
     bool? strictTypeFiltering,
