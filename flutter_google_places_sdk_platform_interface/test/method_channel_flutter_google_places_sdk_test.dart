@@ -11,26 +11,31 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('$FlutterGooglePlacesSdkMethodChannel', () {
-    final handlers = <Future<dynamic>? Function(MethodCall call)>[];
-
     const channel = MethodChannel('plugins.msh.com/flutter_google_places_sdk');
     final List<MethodCall> log = <MethodCall>[];
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          log.add(methodCall);
-          for (final callback in handlers) {
-            final result = callback(methodCall);
-            if (result != null) {
-              return result;
-            }
-          }
-          return null;
-        });
+    final List<Future<dynamic>? Function(MethodCall call)> handlers = [];
+    late FlutterGooglePlacesSdkMethodChannel places;
 
-    final places = FlutterGooglePlacesSdkMethodChannel();
+    setUp(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+            log.add(methodCall);
+            for (final callback in handlers) {
+              final result = callback(methodCall);
+              if (result != null) {
+                return result;
+              }
+            }
+            return null;
+          });
+      places = FlutterGooglePlacesSdkMethodChannel();
+    });
 
     tearDown(() {
       log.clear();
+      handlers.clear();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
     });
 
     test('initialize', () async {
@@ -62,18 +67,35 @@ void main() {
       expect(log, <Matcher>[isMethodCall('isInitialized', arguments: null)]);
     });
 
+    test('updateSettings', () async {
+      const testKey = 'updated-key';
+      const locale = Locale('fr', 'FR');
+      await places.updateSettings(testKey, locale: locale, useNewApi: true);
+      expect(log, <Matcher>[
+        isMethodCall(
+          'updateSettings',
+          arguments: <String, Object>{
+            'apiKey': testKey,
+            'locale': {'country': 'FR', 'language': 'fr'},
+            'useNewApi': true,
+          },
+        ),
+      ]);
+    });
+
     test('findAutocompletePredictions', () async {
       const testQuery = 'my-test-query';
       const testCountries = ['c1', 'c2'];
       const newSessionToken = true;
-      const origin = LatLng(lat: 325.21, lng: -952.52);
+      // Realistic coordinates (Jerusalem)
+      const origin = LatLng(lat: 31.7683, lng: 35.2137);
       const locationBias = LatLngBounds(
-        southwest: LatLng(lat: 125.43, lng: 38.32),
-        northeast: LatLng(lat: -38.271, lng: 312.53),
+        southwest: LatLng(lat: 31.7, lng: 35.1),
+        northeast: LatLng(lat: 31.9, lng: 35.3),
       );
       const locationRestriction = LatLngBounds(
-        southwest: LatLng(lat: 49.28, lng: 3921.38),
-        northeast: LatLng(lat: 38.64, lng: 23.32),
+        southwest: LatLng(lat: 31.5, lng: 34.9),
+        northeast: LatLng(lat: 32.0, lng: 35.5),
       );
       await places.findAutocompletePredictions(
         testQuery,
@@ -100,6 +122,13 @@ void main() {
       ]);
     });
 
+    test('findAutocompletePredictions throws on empty query', () {
+      expect(
+        () => places.findAutocompletePredictions(''),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
     test('fetchPlace', () async {
       const placeId = 'my-test-place-id';
       const testFields = [PlaceField.Location, PlaceField.FormattedAddress];
@@ -123,19 +152,6 @@ void main() {
       ]);
     });
 
-    Future<Uint8List> _createImage() async {
-      final paint = Paint();
-      final recorder = PictureRecorder();
-      final Canvas canvas = Canvas(recorder);
-      canvas.drawPaint(paint); // etc
-
-      final picture = recorder.endRecording();
-      final image = await picture.toImage(100, 100);
-      final byteData = await image.toByteData(format: ImageByteFormat.png);
-      final buffer = byteData!.buffer;
-      return buffer.asUint8List();
-    }
-
     test('fetchPlacePhoto', () async {
       const photoRef = 'http://google.com/photo/ref/1';
       const photoMetadata = PhotoMetadata(
@@ -146,52 +162,72 @@ void main() {
       );
       const maxWidth = 50;
 
-      // Mock
-      final handler = (methodCall) async {
-        log.add(methodCall);
+      Future<Uint8List> createImage() async {
+        final paint = Paint();
+        final recorder = PictureRecorder();
+        final Canvas canvas = Canvas(recorder);
+        canvas.drawPaint(paint);
+
+        final picture = recorder.endRecording();
+        final image = await picture.toImage(100, 100);
+        final byteData = await image.toByteData(format: ImageByteFormat.png);
+        final buffer = byteData!.buffer;
+        return buffer.asUint8List();
+      }
+
+      handlers.add((methodCall) {
         if (methodCall.method == 'fetchPlacePhoto') {
-          return await _createImage();
+          return createImage();
         }
         return null;
-      };
+      });
 
-      handlers.add(handler);
-      try {
-        // call
-        await places.fetchPlacePhoto(
-          photoMetadata,
-          maxWidth: maxWidth,
-          maxHeight: null,
-        );
+      await places.fetchPlacePhoto(
+        photoMetadata,
+        maxWidth: maxWidth,
+        maxHeight: null,
+      );
 
-        expect(log, <Matcher>[
-          isMethodCall(
-            'fetchPlacePhoto',
-            arguments: <String, Object?>{
-              'photoMetadata': {
-                'photoReference': photoMetadata.photoReference,
-                'width': photoMetadata.width,
-                'height': photoMetadata.height,
-              },
-              'maxWidth': maxWidth,
-              'maxHeight': null,
-            },
-          ),
-        ]);
-      } catch (err) {
-        handlers.remove(handler);
-      }
+      // Filter only fetchPlacePhoto calls (handler also adds to log)
+      final photoCalls = log
+          .where((c) => c.method == 'fetchPlacePhoto')
+          .toList();
+      expect(photoCalls, hasLength(greaterThanOrEqualTo(1)));
+      final call = photoCalls.first;
+      expect(call.arguments['photoReference'], photoRef);
+      expect(call.arguments['maxWidth'], maxWidth);
+      expect(call.arguments['maxHeight'], isNull);
+    });
+
+    test('fetchPlacePhoto returns imageUrl for string response', () async {
+      const photoMetadata = PhotoMetadata(
+        photoReference: 'places/abc/photos/xyz',
+        width: 800,
+        height: 600,
+        attributions: 'author',
+      );
+
+      handlers.add((methodCall) {
+        if (methodCall.method == 'fetchPlacePhoto') {
+          return Future.value('https://example.com/photo.jpg');
+        }
+        return null;
+      });
+
+      final result = await places.fetchPlacePhoto(photoMetadata);
+      expect(result, isA<FetchPlacePhotoResponseImageUrl>());
     });
 
     test('searchByText', () async {
       const testQuery = 'my-test-query';
+      // Realistic coordinates (Paris)
       const locationBias = LatLngBounds(
-        southwest: LatLng(lat: 125.43, lng: 38.32),
-        northeast: LatLng(lat: -38.271, lng: 312.53),
+        southwest: LatLng(lat: 48.8, lng: 2.2),
+        northeast: LatLng(lat: 48.9, lng: 2.4),
       );
       const locationRestriction = LatLngBounds(
-        southwest: LatLng(lat: 49.28, lng: 3921.38),
-        northeast: LatLng(lat: 38.64, lng: 23.32),
+        southwest: LatLng(lat: 48.7, lng: 2.0),
+        northeast: LatLng(lat: 49.0, lng: 2.6),
       );
       await places.searchByText(
         testQuery,
@@ -236,10 +272,18 @@ void main() {
       ]);
     });
 
+    test('searchByText throws on empty query', () {
+      expect(
+        () => places.searchByText('', fields: [PlaceField.Id]),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
     test('searchNearby', () async {
       const types = ['test1', 'test2'];
+      // Realistic coordinates (New York)
       const locationRestriction = CircularBounds(
-        center: LatLng(lat: 125.43, lng: 38.32),
+        center: LatLng(lat: 40.7128, lng: -74.0060),
         radius: 1000,
       );
       await places.searchNearby(
@@ -270,6 +314,25 @@ void main() {
           },
         ),
       ]);
+    });
+
+    test('searchNearby with minimal parameters', () async {
+      const locationRestriction = CircularBounds(
+        center: LatLng(lat: 40.7128, lng: -74.0060),
+        radius: 500,
+      );
+      await places.searchNearby(
+        fields: [PlaceField.Id],
+        locationRestriction: locationRestriction,
+      );
+
+      expect(log, hasLength(1));
+      final call = log[0];
+      expect(call.method, 'searchNearby');
+      expect(call.arguments['includedTypes'], isNull);
+      expect(call.arguments['excludedTypes'], isNull);
+      expect(call.arguments['rankPreference'], isNull);
+      expect(call.arguments['maxResultCount'], isNull);
     });
   });
 }
