@@ -21,6 +21,8 @@ dependency_overrides:
     path: ../flutter_google_places_sdk_platform_interface
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   json_serializable: ^6.11.2
   build_runner: ^2.10.4
   flutter_lints: ^6.0.0
