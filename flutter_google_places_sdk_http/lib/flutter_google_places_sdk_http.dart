@@ -13,9 +13,18 @@ import 'types/types.dart';
 /// Http implementation plugin for flutter google places sdk
 class FlutterGooglePlacesSdkHttpPlugin
     extends inter.FlutterGooglePlacesSdkPlatform {
+  /// Creates a new [FlutterGooglePlacesSdkHttpPlugin].
+  ///
+  /// An optional [httpClient] can be provided for testing or custom
+  /// configurations. If not provided, a default [http.Client] is used.
+  FlutterGooglePlacesSdkHttpPlugin({http.Client? httpClient})
+    : _httpClient = httpClient ?? http.Client();
+
   static const _kApiHostV2 = 'https://places.googleapis.com';
   static const _kApiPlacesV2 = '${_kApiHostV2}/v1/places:autocomplete';
   static const _kApiPlaceDetailsV2 = '${_kApiHostV2}/v1/places';
+
+  final http.Client _httpClient;
 
   String? _apiKey;
   Locale? _locale;
@@ -214,7 +223,7 @@ class FlutterGooglePlacesSdkHttpPlugin
       '$_kApiHostV2/v1/$photoName/media',
     ).replace(queryParameters: queryParams);
 
-    final response = await http.get(uri);
+    final response = await _httpClient.get(uri);
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw 'Failed to fetch photo. Status: ${response.statusCode}, body: ${response.body}';
     }
@@ -449,7 +458,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     String url, {
     Map<String, String> headers = const {},
   }) async {
-    final response = await http.get(Uri.parse(url), headers: headers);
+    final response = await _httpClient.get(Uri.parse(url), headers: headers);
 
     String? strBody;
     String strBodyErr = '';
@@ -475,7 +484,7 @@ class FlutterGooglePlacesSdkHttpPlugin
     T Function(Map<String, Object?>) jsonParser, {
     Map<String, String> headers = const {},
   }) async {
-    final response = await http.post(
+    final response = await _httpClient.post(
       Uri.parse(url),
       headers: headers,
       body: body,
