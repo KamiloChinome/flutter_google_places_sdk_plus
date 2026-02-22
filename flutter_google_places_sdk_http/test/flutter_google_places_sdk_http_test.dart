@@ -20,7 +20,7 @@ void main() {
     void Function(http.Request)? onRequest,
   }) {
     return MockClient((request) async {
-      onRequest?.call(request as http.Request);
+      onRequest?.call(request);
       return http.Response(body, statusCode);
     });
   }
