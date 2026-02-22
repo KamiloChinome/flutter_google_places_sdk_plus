@@ -19,12 +19,8 @@ class FlutterGooglePlacesSdkMethodChannel
   }
 
   @override
-  Future<void> initialize(
-    String apiKey, {
-    Locale? locale,
-    bool useNewApi = false,
-  }) {
-    return _invokeForSettings('initialize', apiKey, locale, useNewApi);
+  Future<void> initialize(String apiKey, {Locale? locale}) {
+    return _invokeForSettings('initialize', apiKey, locale);
   }
 
   @override
@@ -33,26 +29,20 @@ class FlutterGooglePlacesSdkMethodChannel
   }
 
   @override
-  Future<void> updateSettings(
-    String apiKey, {
-    Locale? locale,
-    bool? useNewApi,
-  }) {
-    return _invokeForSettings('updateSettings', apiKey, locale, useNewApi);
+  Future<void> updateSettings(String apiKey, {Locale? locale}) {
+    return _invokeForSettings('updateSettings', apiKey, locale);
   }
 
   Future<void> _invokeForSettings(
     String methodName,
     String apiKey,
     Locale? locale,
-    bool? useNewApi,
   ) {
     return _channel.invokeMethod<void>(methodName, {
       'apiKey': apiKey,
       'locale': locale == null
           ? null
           : {'country': locale.countryCode, 'language': locale.languageCode},
-      'useNewApi': useNewApi,
     });
   }
 

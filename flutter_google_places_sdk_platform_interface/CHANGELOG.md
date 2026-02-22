@@ -1,3 +1,7 @@
+## 0.5.0
+
+* **Breaking**: Removed `useNewApi` parameter from `initialize()` and `updateSettings()` — this package now exclusively supports Places API (New).
+
 ## 0.4.0
 
 * Starting to support v2/new-api only - removing useNewApi.

@@ -72,8 +72,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                 val apiKey = call.argument<String>("apiKey")
                 val localeMap = call.argument<Map<String, Any>>("locale")
                 val locale = readLocale(localeMap)
-                val useNewApi = call.argument<Boolean>("useNewApi") ?: false
-                initialize(apiKey, locale, useNewApi)
+                initialize(apiKey, locale)
                 result.success(null)
             }
 
@@ -81,8 +80,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                 val apiKey = call.argument<String>("apiKey")
                 val localeMap = call.argument<Map<String, Any>>("locale")
                 val locale = readLocale(localeMap)
-                val useNewApi = call.argument<Boolean>("useNewApi")
-                updateSettings(apiKey, locale, useNewApi)
+                updateSettings(apiKey, locale)
                 result.success(null)
             }
 
@@ -829,7 +827,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         return Locale(language, country)
     }
 
-    private fun initialize(apiKey: String?, locale: Locale?, useNewApi: Boolean) {
+    private fun initialize(apiKey: String?, locale: Locale?) {
         // Only reinitialize if not initialized or API key changed
         if (!Places.isInitialized() || initializedApiKey != apiKey) {
             if (Places.isInitialized()) {
@@ -845,7 +843,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    private fun updateSettings(apiKey: String?, locale: Locale?, useNewApi: Boolean?) {
+    private fun updateSettings(apiKey: String?, locale: Locale?) {
         // Only reinitialize if API key changed
         if (initializedApiKey != apiKey) {
             if (Places.isInitialized()) {

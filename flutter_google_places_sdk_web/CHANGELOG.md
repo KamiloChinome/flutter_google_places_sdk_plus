@@ -1,3 +1,8 @@
+## 0.4.0
+
+* **Breaking**: Removed `useNewApi` parameter from `initialize()` and `updateSettings()` — always uses Places API (New).
+* Upgrading `flutter_google_places_sdk_platform_interface` to `0.5.0`
+
 ## 0.3.0
 
 * Upgrading `flutter_google_places_sdk_platform_interface` to `0.4.0`

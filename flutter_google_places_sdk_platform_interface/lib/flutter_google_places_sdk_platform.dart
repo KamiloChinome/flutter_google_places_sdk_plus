@@ -48,11 +48,7 @@ abstract class FlutterGooglePlacesSdkPlatform extends PlatformInterface {
   /// This method should only be called once prior to using the Places API.
   /// You may call this method again to update the API key used;
   /// if so, all widgets and instances of PlacesClient will now use this new key.
-  Future<void> initialize(
-    String apiKey, {
-    Locale? locale,
-    bool useNewApi = false,
-  }) {
+  Future<void> initialize(String apiKey, {Locale? locale}) {
     throw UnimplementedError('initialize() has not been implemented.');
   }
 
@@ -62,11 +58,7 @@ abstract class FlutterGooglePlacesSdkPlatform extends PlatformInterface {
   }
 
   /// Updates the settings of the places client with the given API key and locale.
-  Future<void> updateSettings(
-    String apiKey, {
-    Locale? locale,
-    bool? useNewApi,
-  }) {
+  Future<void> updateSettings(String apiKey, {Locale? locale}) {
     throw UnimplementedError('updateSettings() has not been implemented.');
   }
 

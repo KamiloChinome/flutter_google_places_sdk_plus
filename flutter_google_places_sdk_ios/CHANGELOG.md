@@ -1,5 +1,11 @@
 ## 0.3.0
 
+* **Breaking**: Removed `useNewApi` parameter from `initialize()` — always uses Places API (New).
+* **Breaking**: Migrated all iOS API calls from Legacy to New Places API:
+  * `findAutocompletePredictions` now uses `GMSAutocompleteRequest` + `fetchAutocompleteSuggestions(from:callback:)` instead of legacy `findAutocompletePredictions(fromQuery:filter:sessionToken:callback:)`
+  * `fetchPlace` now uses `GMSFetchPlaceRequest` + `fetchPlace(with:callback:)` with `placeProperties` instead of legacy `fetchPlace(fromPlaceID:placeFields:sessionToken:callback:)` with bitmask fields
+  * `fetchPlacePhoto` now uses `GMSFetchPhotoRequest` + `fetchPhoto(with:callback:)` with configurable `maxSize` (up to 4800x4800) instead of legacy `loadPlacePhoto(_:callback:)`
+* Fix `fetchPlacePhoto` argument parsing to match method channel contract (reads `photoReference` directly instead of from nested `photoMetadata` dict)
 * Upgrading `flutter_google_places_sdk_platform_interface` to `0.5.0`
 * Implement `updateSettings` method for runtime API key and locale changes
 * Implement `searchByText` using `GMSPlaceSearchByTextRequest`

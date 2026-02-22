@@ -1,3 +1,8 @@
+## 0.5.0
+
+* **Breaking**: Removed `useNewApi` parameter from constructor and `updateSettings()` — this package now exclusively supports Places API (New).
+* Upgrading `flutter_google_places_sdk_platform_interface` to `0.5.0`
+
 ## 0.4.3
 
 * Upgrading `flutter_google_places_sdk_platform_interface` to `0.3.4`

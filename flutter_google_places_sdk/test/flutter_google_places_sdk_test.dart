@@ -77,7 +77,6 @@ void main() {
           'country': kDefaultLocale.countryCode,
           'language': kDefaultLocale.languageCode,
         },
-        'useNewApi': false,
       },
     );
   }
@@ -421,14 +420,6 @@ void main() {
         final call = log[1];
         expect(call.arguments['apiKey'], kDefaultApiKey);
         expect(flutterGooglePlacesSdk.apiKey, kDefaultApiKey);
-      });
-
-      test('updates useNewApi flag', () async {
-        responses['updateSettings'] = null;
-        await flutterGooglePlacesSdk.updateSettings(useNewApi: true);
-
-        final call = log[1];
-        expect(call.arguments['useNewApi'], true);
       });
     });
 

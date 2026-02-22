@@ -1,5 +1,6 @@
 ## 0.4.0
 
+* **Breaking**: Removed `useNewApi` parameter from `initialize()` and `updateSettings()` — always uses Places API (New).
 * Upgrading `flutter_google_places_sdk_platform_interface` to `0.5.0`
 * Serialize all new Places API (New) fields in `placeToMap()`: primaryType, primaryTypeDisplayName, shortFormattedAddress, editorialSummary, googleMapsUri, googleMapsLinks, timeZone, postalAddress, currentOpeningHours, secondaryOpeningHours, currentSecondaryOpeningHours, and all boolean service attributes (allowsDogs, goodForChildren, servesCocktails, servesCoffee, servesDessert, restroom, goodForGroups, goodForWatchingSports, liveMusic, outdoorSeating, menuForChildren, pureServiceAreaBusiness)
 * Serialize complex option types: paymentOptions, parkingOptions, evChargeOptions, fuelOptions, accessibilityOptions, priceRange

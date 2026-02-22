@@ -40,18 +40,13 @@ void main() {
 
     test('initialize', () async {
       const testKey = 'my-key';
-      await places.initialize(
-        testKey,
-        locale: const Locale('en'),
-        useNewApi: true,
-      );
+      await places.initialize(testKey, locale: const Locale('en'));
       expect(log, <Matcher>[
         isMethodCall(
           'initialize',
           arguments: <String, Object>{
             'apiKey': testKey,
             'locale': {'country': null, 'language': 'en'},
-            'useNewApi': true,
           },
         ),
       ]);
@@ -70,14 +65,13 @@ void main() {
     test('updateSettings', () async {
       const testKey = 'updated-key';
       const locale = Locale('fr', 'FR');
-      await places.updateSettings(testKey, locale: locale, useNewApi: true);
+      await places.updateSettings(testKey, locale: locale);
       expect(log, <Matcher>[
         isMethodCall(
           'updateSettings',
           arguments: <String, Object>{
             'apiKey': testKey,
             'locale': {'country': 'FR', 'language': 'fr'},
-            'useNewApi': true,
           },
         ),
       ]);
