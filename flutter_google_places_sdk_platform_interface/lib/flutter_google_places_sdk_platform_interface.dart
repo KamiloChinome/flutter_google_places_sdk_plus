@@ -1,2 +1,0 @@
-export 'package:flutter_google_places_sdk_platform_interface/flutter_google_places_sdk_platform.dart';
-export 'package:flutter_google_places_sdk_platform_interface/src/types/types.dart';

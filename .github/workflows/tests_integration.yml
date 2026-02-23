@@ -6,7 +6,7 @@ on:
 env:
   flutter_version: "2.5.1"
   java_version: "11.x"
-  dir: "flutter_google_places_sdk"
+  dir: "google_places_sdk_plus"
   ndk_version: "21.4.7075529"
 
 jobs:
@@ -74,7 +74,7 @@ jobs:
         run: flutter build ios --no-codesign
         working-directory: ${{ env.dir }}/example
       - name: Integration Test
-        run: flutter drive --driver=test_driver/integration_test.dart --target=integration_test/flutter_google_places_sdk_it_test.dart
+        run: flutter drive --driver=test_driver/integration_test.dart --target=integration_test/google_places_sdk_plus_it_test.dart
         working-directory: ${{ env.dir }}/example
         env:
           PLACES_API_KEY: ${{ secrets.PLACES_API_KEY }}
@@ -124,7 +124,7 @@ jobs:
           arch: x86_64
           ndk: ${{ env.ndk_version }}
           profile: Nexus 6
-          script: flutter drive --driver=test_driver/integration_test.dart --target=integration_test/flutter_google_places_sdk_it_test.dart
+          script: flutter drive --driver=test_driver/integration_test.dart --target=integration_test/google_places_sdk_plus_it_test.dart
           working-directory: ${{ env.dir }}/example
         env:
           PLACES_API_KEY: ${{ secrets.PLACES_API_KEY }}

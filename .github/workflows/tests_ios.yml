@@ -4,15 +4,15 @@ on:
   workflow_dispatch:
   push:
     branches: [master]
-    paths: ['flutter_google_places_sdk_ios/**']
+    paths: ['google_places_sdk_plus_ios/**']
   pull_request:
     branches: [master]
-    paths: ['flutter_google_places_sdk_ios/**']
+    paths: ['google_places_sdk_plus_ios/**']
 
 env:
   flutter_version: "3.29.0"
   java_version: "19.x"
-  dir: "flutter_google_places_sdk_ios"
+  dir: "google_places_sdk_plus_ios"
 
 jobs:
   setup_pi:

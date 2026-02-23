@@ -1,0 +1,50 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localKeystoreProperties = new Properties()
+def localKeystorePropertiesFile = rootProject.file('C:\\dev\\upload_key\\local-key.properties')
+if (localKeystorePropertiesFile.exists()) {
+    localKeystoreProperties.load(new FileInputStream(localKeystorePropertiesFile))
+}
+
+android {
+    namespace 'io.google_places_sdk_plus.example'
+    compileSdkVersion 34
+    ndkVersion "27.0.12077973"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    defaultConfig {
+        applicationId "io.google_places_sdk_plus.example"
+        minSdkVersion flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    lint {
+        disable 'InvalidPackage'
+    }
+}
+
+flutter {
+    source '../..'
+}
