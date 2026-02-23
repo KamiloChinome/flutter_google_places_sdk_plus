@@ -1,3 +1,7 @@
+## 0.5.1
+
+* Improved README with fork context, full feature list, and additional usage examples.
+
 ## 0.5.0
 
 Initial release of `google_places_sdk_plus`.
