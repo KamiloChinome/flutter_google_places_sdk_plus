@@ -12,15 +12,15 @@ sealed class AddressComponent with _$AddressComponent {
   /// Constructs an [AddressComponent] object.
   const factory AddressComponent({
     /// Name of the address component, e.g. "Sydney".
-    required String name,
+    String? name,
 
     /// Short name of the address component, e.g. "AU".
-    required String shortName,
+    String? shortName,
 
     /// Types of the AddressComponent
     ///
     /// For a list of supported types, see [Address Component Types](https://developers.google.com/maps/documentation/geocoding/overview#Types)
-    required List<String> types,
+    List<String>? types,
   }) = _AddressComponent;
 
   /// Parse an [AddressComponent] from json.

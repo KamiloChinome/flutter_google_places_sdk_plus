@@ -11,7 +11,7 @@ sealed class LocalizedText with _$LocalizedText {
   /// Constructs a [LocalizedText] object.
   const factory LocalizedText({
     /// Localized string in the language corresponding to [languageCode].
-    required String text,
+    String? text,
 
     /// The text's BCP-47 language code, such as "en-US" or "sr-Latn".
     String? languageCode,

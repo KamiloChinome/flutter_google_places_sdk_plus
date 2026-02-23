@@ -11,7 +11,7 @@ sealed class Money with _$Money {
   /// Constructs a [Money] object.
   const factory Money({
     /// The three-letter currency code defined in ISO 4217.
-    required String currencyCode,
+    String? currencyCode,
 
     /// The whole units of the amount.
     /// For example if [currencyCode] is "USD", then 1 unit is one US dollar.

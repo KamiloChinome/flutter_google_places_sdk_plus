@@ -9,19 +9,19 @@ sealed class Review with _$Review {
   /// Constructs a [Review] object.
   const factory Review({
     /// The attribution that must be shown to the user if this review is displayed.
-    required String attribution,
+    String? attribution,
 
     /// This review's AuthorAttribution.
-    required AuthorAttribution authorAttribution,
+    AuthorAttribution? authorAttribution,
 
     /// A whole number between 1.0 and 5.0 (inclusive), meaning the number of stars.
-    required double rating,
+    double? rating,
 
     /// The publish time for the review, expressed in "yyyy-MM-dd HH:mm:ss" format of UTC timezone.
-    required String publishTime,
+    String? publishTime,
 
     /// A human-readable description of the relative publish time of a review, such as "a month ago", or "in the last week", based on the time elapsed.
-    required String relativePublishTimeDescription,
+    String? relativePublishTimeDescription,
 
     /// The text of the review in its original language.
     String? originalText,

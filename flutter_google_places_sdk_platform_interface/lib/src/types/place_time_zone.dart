@@ -13,7 +13,7 @@ sealed class PlaceTimeZone with _$PlaceTimeZone {
   /// Constructs a [PlaceTimeZone] object.
   const factory PlaceTimeZone({
     /// IANA Time Zone Database time zone, e.g. "America/New_York".
-    required String id,
+    String? id,
 
     /// Optional. IANA Time Zone Database version number,
     /// e.g. "2019a".

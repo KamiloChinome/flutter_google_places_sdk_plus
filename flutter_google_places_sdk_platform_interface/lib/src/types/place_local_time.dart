@@ -10,10 +10,10 @@ part 'place_local_time.g.dart';
 sealed class PlaceLocalTime with _$PlaceLocalTime {
   const factory PlaceLocalTime({
     /// The hours in 24 hour format (0 <= return value < 24).
-    required int hours,
+    int? hours,
 
     /// The minutes (0 <= return value < 60).
-    required int minutes,
+    int? minutes,
   }) = _PlaceLocalTime;
 
   /// Parse an [PlaceLocalTime] from json.

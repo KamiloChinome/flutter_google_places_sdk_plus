@@ -15,22 +15,22 @@ sealed class AutocompletePrediction with _$AutocompletePrediction {
   /// Constructs an [AutocompletePrediction] object.
   const factory AutocompletePrediction({
     /// the straight-line distance between the place being referred to by getPlaceId() and the origin specified in the request.
-    required int? distanceMeters,
+    int? distanceMeters,
 
     /// the place ID of the place being referred to by this prediction.
-    required String placeId,
+    String? placeId,
 
     /// the list of place types associated with the place referred to by getPlaceId()
     List<PlaceType>? placeTypes,
 
     /// the primary text of a place.
-    required String primaryText,
+    String? primaryText,
 
     /// the secondary text of a place.
-    required String secondaryText,
+    String? secondaryText,
 
     /// The full text of a place.
-    required String fullText,
+    String? fullText,
   }) = _AutocompletePrediction;
 
   /// Parse an [AutocompletePrediction] from json.

@@ -317,7 +317,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onItemClicked(AutocompletePrediction item) {
-    _fetchPlaceIdController.text = item.placeId;
+    _fetchPlaceIdController.text = item.placeId ?? '';
   }
 
   Widget _buildPredictionItem(AutocompletePrediction item) {
@@ -325,8 +325,8 @@ class _MyHomePageState extends State<MyHomePage> {
       onTap: () => _onItemClicked(item),
       child: Column(
         children: [
-          Text(item.fullText),
-          Text(item.primaryText + ' - ' + item.secondaryText),
+          Text(item.fullText ?? ''),
+          Text('${item.primaryText ?? ''} - ${item.secondaryText ?? ''}'),
           const Divider(thickness: 2),
         ],
       ),

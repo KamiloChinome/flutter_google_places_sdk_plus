@@ -13,10 +13,10 @@ sealed class TimeOfWeek with _$TimeOfWeek {
   /// Constructs a [TimeOfWeek] object.
   const factory TimeOfWeek({
     /// The day of the week.
-    required DayOfWeek day,
+    DayOfWeek? day,
 
     /// The time in 24 hour format, for example "1730", or "0000"
-    required PlaceLocalTime time,
+    PlaceLocalTime? time,
   }) = _TimeOfWeek;
 
   /// Parse an [TimeOfWeek] from json.

@@ -11,10 +11,10 @@ sealed class PlusCode with _$PlusCode {
   /// Constructs a [PlusCode] object.
   const factory PlusCode({
     /// The compound plus code, e.g. "9G8F+5W Zurich, Switzerland".
-    required String compoundCode,
+    String? compoundCode,
 
     /// The geo plus code, e.g. "8FVC9G8F+5W".
-    required String globalCode,
+    String? globalCode,
   }) = _PlusCode;
 
   /// Parse an [PlusCode] from json.

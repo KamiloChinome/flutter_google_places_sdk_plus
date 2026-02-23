@@ -11,16 +11,16 @@ part 'photo_metadata.g.dart';
 sealed class PhotoMetadata with _$PhotoMetadata {
   const factory PhotoMetadata({
     /// Non-empty String used to identify the underlying photo.
-    required String photoReference,
+    String? photoReference,
 
     /// The maximum width in which this photo is available.
-    required int width,
+    int? width,
 
     /// The maximum height in which this photo is available.
-    required int height,
+    int? height,
 
     /// The attributions that must be shown to the user if this photo is displayed.
-    required String attributions,
+    String? attributions,
 
     /// The author attributions for this photo.
     ///

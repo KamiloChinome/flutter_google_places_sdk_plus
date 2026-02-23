@@ -1,4 +1,3 @@
-
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'author_attribution.freezed.dart';
@@ -9,13 +8,13 @@ sealed class AuthorAttribution with _$AuthorAttribution {
   /// Constructs a [AuthorAttribution] object.
   const factory AuthorAttribution({
     /// The name of the author.
-    required String name,
+    String? name,
 
     /// The profile photo URI of the author.
-    required String photoUri,
+    String? photoUri,
 
     /// The URI of the author.
-    required String uri,
+    String? uri,
   }) = _AuthorAttribution;
 
   /// Parse an [AuthorAttribution] from json.

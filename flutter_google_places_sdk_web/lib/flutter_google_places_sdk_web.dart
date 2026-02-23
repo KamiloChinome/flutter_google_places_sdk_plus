@@ -426,7 +426,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
       attributions: attrs.length == 1 ? attrs[0] : '',
     );
 
-    _photosCache[photoMetadata.photoReference] = photo;
+    _photosCache[photoMetadata.photoReference ?? ''] = photo;
 
     return photoMetadata;
   }

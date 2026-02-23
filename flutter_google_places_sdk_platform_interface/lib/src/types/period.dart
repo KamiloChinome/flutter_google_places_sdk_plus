@@ -9,10 +9,7 @@ part 'period.g.dart';
 /// Ref: https://developers.google.com/maps/documentation/places/android-sdk/reference/com/google/android/libraries/places/api/model/Period
 @freezed
 sealed class Period with _$Period {
-  const factory Period({
-    required TimeOfWeek open,
-    required TimeOfWeek? close,
-  }) = _Period;
+  const factory Period({TimeOfWeek? open, TimeOfWeek? close}) = _Period;
 
   /// Parse an [Period] from json.
   factory Period.fromJson(Map<String, Object?> json) => _$PeriodFromJson(json);

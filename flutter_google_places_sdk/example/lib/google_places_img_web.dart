@@ -13,9 +13,11 @@ class GooglePlacesImg extends StatelessWidget {
   final FetchPlacePhotoResponse placePhotoResponse;
 
   /// Construct a google place img using metadata and response object
-  const GooglePlacesImg(
-      {Key? key, required this.photoMetadata, required this.placePhotoResponse})
-      : super(key: key);
+  const GooglePlacesImg({
+    Key? key,
+    required this.photoMetadata,
+    required this.placePhotoResponse,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,16 +31,16 @@ class GooglePlacesImg extends StatelessWidget {
 
     // ignore: undefined_prefixed_name
     platformViewRegistry.registerViewFactory(
-      photoMetadata.photoReference,
+      photoMetadata.photoReference ?? '',
       (int viewId) => web.HTMLImageElement()
         ..id = 'gp_img_$viewId'
         ..setAttribute('src', imageUrl),
     );
 
-    final view = HtmlElementView(viewType: photoMetadata.photoReference);
+    final view = HtmlElementView(viewType: photoMetadata.photoReference ?? '');
     return Container(
-      width: photoMetadata.width.toDouble(),
-      height: photoMetadata.height.toDouble(),
+      width: photoMetadata.width?.toDouble() ?? 0,
+      height: photoMetadata.height?.toDouble() ?? 0,
       child: view,
     );
   }

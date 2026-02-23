@@ -12,10 +12,10 @@ sealed class OpeningHours with _$OpeningHours {
   /// constructs an [OpeningHours] object.
   const factory OpeningHours({
     /// A list of Period objects that provide more detailed information that is equivalent to the data provided by getWeekdayText().
-    required List<Period> periods,
+    List<Period>? periods,
 
     /// Returns a list of strings that represent opening and closing hours in human readable form.
-    required List<String> weekdayText,
+    List<String>? weekdayText,
   }) = _OpeningHours;
 
   /// Parse an [OpeningHours] from json.
