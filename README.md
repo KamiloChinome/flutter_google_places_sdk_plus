@@ -2,7 +2,7 @@
 
 A Flutter plugin for the [Google Places API (New)](https://developers.google.com/maps/documentation/places/web-service/op-overview) using native SDKs on each platform.
 
-Originally forked from [`flutter_google_places_sdk`](https://github.com/matanshukry/flutter_google_places_sdk) by Matan Shukry (BSD-3-Clause). This package extends the original with full Places API (New) coverage, migrates away from deprecated endpoints, and is independently maintained.
+Originally forked from [`flutter_google_places_sdk`](https://github.com/matanshukry/flutter_google_places_sdk). This package extends the original with full Places API (New) coverage, migrates away from deprecated endpoints, and is independently maintained.
 
 ## Features
 
