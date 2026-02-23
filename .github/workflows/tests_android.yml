@@ -3,10 +3,10 @@ name: FlutterTests-android
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [main]
     paths: ['google_places_sdk_plus_android/**']
   pull_request:
-    branches: [master]
+    branches: [main]
     paths: ['google_places_sdk_plus_android/**']
 
 env:
