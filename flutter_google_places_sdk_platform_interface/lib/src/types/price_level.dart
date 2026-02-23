@@ -20,8 +20,16 @@ enum PriceLevel {
   @JsonValue('PRICE_LEVEL_VERY_EXPENSIVE')
   priceLevelVeryExpensive;
 
-  factory PriceLevel.fromJson(String name) {
-    name = name.toUpperCase();
+  factory PriceLevel.fromJson(dynamic value) {
+    if (value is int) {
+      // iOS SDK sends priceLevel as an int (raw enum value)
+      // 0 = unspecified, 1 = free, 2 = inexpensive, 3 = moderate, 4 = expensive, 5 = very expensive
+      if (value >= 0 && value < PriceLevel.values.length) {
+        return PriceLevel.values[value];
+      }
+      return PriceLevel.priceLevelUnspecified;
+    }
+    final name = (value as String).toUpperCase();
     for (final pair in _$PriceLevelEnumMap.entries) {
       if (pair.value == name) {
         return pair.key;

@@ -248,10 +248,10 @@ void main() {
       });
       expect(place.openingHours, isNotNull);
       expect(place.openingHours!.periods, hasLength(1));
-      expect(place.openingHours!.periods[0].open.day, DayOfWeek.Monday);
-      expect(place.openingHours!.periods[0].open.time.hours, 9);
-      expect(place.openingHours!.periods[0].open.time.minutes, 30);
-      expect(place.openingHours!.periods[0].close!.time.hours, 17);
+      expect(place.openingHours!.periods![0].open!.day, DayOfWeek.Monday);
+      expect(place.openingHours!.periods![0].open!.time!.hours, 9);
+      expect(place.openingHours!.periods![0].open!.time!.minutes, 30);
+      expect(place.openingHours!.periods![0].close!.time!.hours, 17);
       expect(place.openingHours!.weekdayText, ['Monday: 9:30 AM – 5:00 PM']);
     });
 
