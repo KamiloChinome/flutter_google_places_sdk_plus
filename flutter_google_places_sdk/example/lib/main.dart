@@ -107,6 +107,35 @@ class _MyHomePageState extends State<MyHomePage> {
   FetchPlacePhotoResponse? _placePhoto;
   PhotoMetadata? _placePhotoMetadata;
 
+  // -- Search by Text
+  String? _searchByTextLastQuery;
+  bool _searchingByText = false;
+  dynamic _searchByTextErr;
+  List<Place>? _searchByTextResults;
+  String? _searchByTextIncludedType;
+  int? _searchByTextMaxResults;
+  double? _searchByTextMinRating;
+  bool _searchByTextOpenNow = false;
+  bool _searchByTextStrictTypeFiltering = false;
+  TextSearchRankPreference? _searchByTextRankPreference;
+
+  bool _searchByTextLocationBiasEnabled = false;
+  LatLngBounds _searchByTextLocationBias = LatLngBounds(
+    southwest: LatLng(lat: 32.0810305, lng: 34.785707),
+    northeast: LatLng(lat: 32.0935937, lng: 34.8013896),
+  );
+
+  // -- Search Nearby
+  bool _searchingNearby = false;
+  dynamic _searchNearbyErr;
+  List<Place>? _searchNearbyResults;
+  String? _searchNearbyIncludedTypes;
+  int? _searchNearbyMaxResults;
+  NearbySearchRankPreference? _searchNearbyRankPreference;
+
+  LatLng _searchNearbyCenter = LatLng(lat: 32.0853, lng: 34.7818);
+  double _searchNearbyRadius = 500.0;
+
   @override
   void initState() {
     super.initState();
@@ -140,6 +169,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final predictionsWidgets = _buildPredictionWidgets();
     final fetchPlaceWidgets = _buildFetchPlaceWidgets();
     final fetchPlacePhotoWidgets = _buildFetchPlacePhotoWidgets();
+    final searchByTextWidgets = _buildSearchByTextWidgets();
+    final searchNearbyWidgets = _buildSearchNearbyWidgets();
     return Scaffold(
       appBar: AppBar(
         title: const Text(title),
@@ -160,7 +191,11 @@ class _MyHomePageState extends State<MyHomePage> {
               [SizedBox(height: 16)] +
               fetchPlaceWidgets +
               [SizedBox(height: 16)] +
-              fetchPlacePhotoWidgets,
+              fetchPlacePhotoWidgets +
+              [SizedBox(height: 16)] +
+              searchByTextWidgets +
+              [SizedBox(height: 16)] +
+              searchNearbyWidgets,
         ),
       ),
     );
@@ -492,6 +527,339 @@ class _MyHomePageState extends State<MyHomePage> {
             .toList(growable: false),
       ),
       Image(image: FlutterGooglePlacesSdk.assetPoweredByGoogleOnWhite),
+    ];
+  }
+
+  // ===== Search by Text =====
+
+  void _searchByText() async {
+    if (_searchingByText) return;
+
+    final hasContent = _searchByTextLastQuery?.isNotEmpty ?? false;
+    setState(() {
+      _searchingByText = hasContent;
+      _searchByTextErr = null;
+    });
+
+    if (!hasContent) return;
+
+    try {
+      final result = await _places.searchByText(
+        _searchByTextLastQuery!,
+        fields: PlaceField.values,
+        includedType: _searchByTextIncludedType,
+        maxResultCount: _searchByTextMaxResults,
+        minRating: _searchByTextMinRating,
+        openNow: _searchByTextOpenNow ? true : null,
+        strictTypeFiltering: _searchByTextStrictTypeFiltering ? true : null,
+        rankPreference: _searchByTextRankPreference,
+        locationBias: _searchByTextLocationBiasEnabled
+            ? _searchByTextLocationBias
+            : null,
+      );
+
+      setState(() {
+        _searchByTextResults = result.places;
+        _searchingByText = false;
+      });
+    } catch (err) {
+      setState(() {
+        _searchByTextErr = err;
+        _searchingByText = false;
+      });
+    }
+  }
+
+  List<Widget> _buildSearchByTextWidgets() {
+    return [
+      Text('Search by Text', style: Theme.of(context).textTheme.titleMedium),
+      // -- Text query
+      TextFormField(
+        onChanged: (value) => _searchByTextLastQuery = value,
+        decoration: InputDecoration(label: Text("Text Query")),
+      ),
+      // -- Included Type
+      TextFormField(
+        onChanged: (value) =>
+            _searchByTextIncludedType = value.isEmpty ? null : value,
+        decoration: InputDecoration(
+          label: Text("Included Type"),
+          hintText: "e.g. restaurant",
+        ),
+      ),
+      // -- Max Result Count
+      TextFormField(
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) => _searchByTextMaxResults = value.isEmpty
+            ? null
+            : int.tryParse(value),
+        decoration: InputDecoration(label: Text("Max Results")),
+      ),
+      // -- Min Rating
+      TextFormField(
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
+        onChanged: (value) => _searchByTextMinRating = value.isEmpty
+            ? null
+            : double.tryParse(value),
+        decoration: InputDecoration(label: Text("Min Rating (0-5)")),
+      ),
+      // -- Open Now
+      Row(
+        children: [
+          Checkbox(
+            value: _searchByTextOpenNow,
+            onChanged: (value) {
+              setState(() => _searchByTextOpenNow = value ?? false);
+            },
+          ),
+          Text('Open Now'),
+        ],
+      ),
+      // -- Strict Type Filtering
+      Row(
+        children: [
+          Checkbox(
+            value: _searchByTextStrictTypeFiltering,
+            onChanged: (value) {
+              setState(() => _searchByTextStrictTypeFiltering = value ?? false);
+            },
+          ),
+          Text('Strict Type Filtering'),
+        ],
+      ),
+      // -- Rank Preference
+      DropdownButton<TextSearchRankPreference?>(
+        hint: Text("Rank Preference"),
+        items: [
+          DropdownMenuItem(value: null, child: Text('None')),
+          ...TextSearchRankPreference.values.map(
+            (item) => DropdownMenuItem(value: item, child: Text(item.name)),
+          ),
+        ],
+        value: _searchByTextRankPreference,
+        onChanged: (value) {
+          setState(() => _searchByTextRankPreference = value);
+        },
+      ),
+      // -- Location Bias
+      _buildEnabledOption(
+        _searchByTextLocationBiasEnabled,
+        (value) => _searchByTextLocationBiasEnabled = value,
+        LocationField(
+          label: "Location Bias",
+          enabled: _searchByTextLocationBiasEnabled,
+          value: _searchByTextLocationBias,
+          onChanged: (bounds) {
+            setState(() => _searchByTextLocationBias = bounds);
+          },
+        ),
+      ),
+      // -- Search button
+      ElevatedButton(
+        onPressed: _searchingByText ? null : _searchByText,
+        child: const Text('Search by Text'),
+      ),
+      // -- Error + Results
+      _buildErrorWidget(_searchByTextErr),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: (_searchByTextResults ?? [])
+            .map(
+              (place) => Padding(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      place.displayName?.text ?? place.name ?? 'N/A',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(place.address ?? ''),
+                    if (place.rating != null) Text('Rating: ${place.rating}'),
+                    const Divider(thickness: 2),
+                  ],
+                ),
+              ),
+            )
+            .toList(growable: false),
+      ),
+    ];
+  }
+
+  // ===== Search Nearby =====
+
+  void _searchNearby() async {
+    if (_searchingNearby) return;
+
+    setState(() {
+      _searchingNearby = true;
+      _searchNearbyErr = null;
+    });
+
+    try {
+      final result = await _places.searchNearby(
+        fields: PlaceField.values,
+        locationRestriction: CircularBounds(
+          center: _searchNearbyCenter,
+          radius: _searchNearbyRadius,
+        ),
+        includedTypes: _searchNearbyIncludedTypes?.isNotEmpty == true
+            ? _searchNearbyIncludedTypes!
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList()
+            : null,
+        maxResultCount: _searchNearbyMaxResults,
+        rankPreference: _searchNearbyRankPreference,
+      );
+
+      setState(() {
+        _searchNearbyResults = result.places;
+        _searchingNearby = false;
+      });
+    } catch (err) {
+      setState(() {
+        _searchNearbyErr = err;
+        _searchingNearby = false;
+      });
+    }
+  }
+
+  List<Widget> _buildSearchNearbyWidgets() {
+    return [
+      Text('Search Nearby', style: Theme.of(context).textTheme.titleMedium),
+      // -- Center Lat
+      Row(
+        children: [
+          Flexible(
+            child: TextFormField(
+              keyboardType: TextInputType.numberWithOptions(
+                signed: true,
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[\d.\-]')),
+              ],
+              initialValue: _searchNearbyCenter.lat.toString(),
+              onChanged: (value) {
+                final lat = double.tryParse(value);
+                if (lat != null) {
+                  _searchNearbyCenter = LatLng(
+                    lat: lat,
+                    lng: _searchNearbyCenter.lng,
+                  );
+                }
+              },
+              decoration: InputDecoration(label: Text("Center Lat")),
+            ),
+          ),
+          SizedBox(width: 8),
+          Flexible(
+            child: TextFormField(
+              keyboardType: TextInputType.numberWithOptions(
+                signed: true,
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[\d.\-]')),
+              ],
+              initialValue: _searchNearbyCenter.lng.toString(),
+              onChanged: (value) {
+                final lng = double.tryParse(value);
+                if (lng != null) {
+                  _searchNearbyCenter = LatLng(
+                    lat: _searchNearbyCenter.lat,
+                    lng: lng,
+                  );
+                }
+              },
+              decoration: InputDecoration(label: Text("Center Lng")),
+            ),
+          ),
+        ],
+      ),
+      // -- Radius
+      TextFormField(
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
+        initialValue: _searchNearbyRadius.toString(),
+        onChanged: (value) {
+          final radius = double.tryParse(value);
+          if (radius != null) _searchNearbyRadius = radius;
+        },
+        decoration: InputDecoration(label: Text("Radius (meters)")),
+      ),
+      // -- Included Types
+      TextFormField(
+        onChanged: (value) =>
+            _searchNearbyIncludedTypes = value.isEmpty ? null : value,
+        decoration: InputDecoration(
+          label: Text("Included Types"),
+          hintText: "e.g. restaurant,cafe",
+        ),
+      ),
+      // -- Max Result Count
+      TextFormField(
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) => _searchNearbyMaxResults = value.isEmpty
+            ? null
+            : int.tryParse(value),
+        decoration: InputDecoration(label: Text("Max Results")),
+      ),
+      // -- Rank Preference
+      DropdownButton<NearbySearchRankPreference?>(
+        hint: Text("Rank Preference"),
+        items: [
+          DropdownMenuItem(value: null, child: Text('None')),
+          ...NearbySearchRankPreference.values.map(
+            (item) => DropdownMenuItem(value: item, child: Text(item.name)),
+          ),
+        ],
+        value: _searchNearbyRankPreference,
+        onChanged: (value) {
+          setState(() => _searchNearbyRankPreference = value);
+        },
+      ),
+      // -- Search button
+      ElevatedButton(
+        onPressed: _searchingNearby ? null : _searchNearby,
+        child: const Text('Search Nearby'),
+      ),
+      // -- Error + Results
+      _buildErrorWidget(_searchNearbyErr),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: (_searchNearbyResults ?? [])
+            .map(
+              (place) => Padding(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      place.displayName?.text ?? place.name ?? 'N/A',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(place.address ?? ''),
+                    if (place.rating != null) Text('Rating: ${place.rating}'),
+                    if (place.types != null)
+                      Text(
+                        'Types: ${place.types!.map((t) => t.name).join(", ")}',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    const Divider(thickness: 2),
+                  ],
+                ),
+              ),
+            )
+            .toList(growable: false),
+      ),
     ];
   }
 
