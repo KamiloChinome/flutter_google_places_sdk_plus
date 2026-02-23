@@ -166,7 +166,7 @@ class FlutterGooglePlacesSdkMethodChannel
     return _channel
         .invokeListMethod<Map<dynamic, dynamic>>('searchByText', {
           'textQuery': textQuery,
-          'fields': fields.map((e) => e.value).toList(),
+          'fields': fields.map((e) => e.name).toList(),
           'includedType': includedType,
           'maxResultCount': maxResultCount,
           'locationBias': locationBias?.toJson(),
@@ -207,7 +207,7 @@ class FlutterGooglePlacesSdkMethodChannel
   }) {
     return _channel
         .invokeListMethod<Map<dynamic, dynamic>>('searchNearby', {
-          'fields': fields.map((e) => e.value).toList(),
+          'fields': fields.map((e) => e.name).toList(),
           'locationRestriction': locationRestriction.toJson(),
           'includedTypes': includedTypes,
           'includedPrimaryTypes': includedPrimaryTypes,

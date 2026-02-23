@@ -1,6 +1,7 @@
 package com.msh.flutter_google_places_sdk
 
 import android.content.Context
+import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.libraries.places.api.Places
@@ -135,7 +136,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
 
             METHOD_FETCH_PLACE -> {
                 val placeId = call.argument<String>("placeId")!!
-                val fields = call.argument<List<String>>("fields")?.map { placeFieldFromStr(it) }
+                val fields = call.argument<List<String>>("fields")?.mapNotNull { placeFieldFromStr(it) }
                     ?: emptyList()
                 val regionCode = call.argument<String>("regionCode")
                 val newSessionToken = call.argument<Boolean>("newSessionToken")
@@ -193,7 +194,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                 val openNow = call.argument<Boolean>("openNow") ?: false
                 val priceLevels = call.argument<List<Int>>("priceLevels")
                     ?: emptyList()
-                val regionCode = call.argument<String>("regionCode")!!
+                val regionCode = call.argument<String>("regionCode")
                 val rankPreference = call.argument<String>("rankPreference")
                     ?.let(SearchByTextRequest.RankPreference::valueOf)
                     ?: SearchByTextRequest.RankPreference.RELEVANCE
@@ -202,9 +203,9 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                     rectangularBoundsFromMap(call.argument<Map<String, Any?>>("locationBias"))
                 val locationRestriction =
                     rectangularBoundsFromMap(call.argument<Map<String, Any?>>("locationRestriction"))
-                val fields = call.argument<List<String>>("fields")?.map { placeFieldFromStr(it) }
+                val fields = call.argument<List<String>>("fields")?.mapNotNull { placeFieldFromStr(it) }
                     ?: emptyList()
-                val request = SearchByTextRequest.builder(textQuery, fields)
+                val requestBuilder = SearchByTextRequest.builder(textQuery, fields)
                     .setIncludedType(includedType)
                     .setLocationBias(locationBias)
                     .setLocationRestriction(locationRestriction)
@@ -213,9 +214,11 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                     .setOpenNow(openNow)
                     .setPriceLevels(priceLevels)
                     .setRankPreference(rankPreference)
-                    .setRegionCode(regionCode)
                     .setStrictTypeFiltering(strictTypeFiltering)
-                    .build()
+                if (regionCode != null) {
+                    requestBuilder.setRegionCode(regionCode)
+                }
+                val request = requestBuilder.build()
                 client!!.searchByText(request).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val places = task.result?.places?.map { placeToMap(it) }
@@ -233,7 +236,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             }
 
             METHOD_NEARBY_SEARCH -> {
-                val fields = call.argument<List<String>>("fields")?.map { placeFieldFromStr(it) }
+                val fields = call.argument<List<String>>("fields")?.mapNotNull { placeFieldFromStr(it) }
                     ?: emptyList()
                 val locationRestriction =
                     circularBoundsFromMap(call.argument<Map<String, Any?>>("locationRestriction"))
@@ -337,7 +340,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         return LatLng(lat, lng)
     }
 
-    private fun placeFieldFromStr(it: String): Place.Field {
+    private fun placeFieldFromStr(it: String): Place.Field? {
         try {
             return when (it) {
                 // Explicit mappings for fields where Dart name != Android SDK enum name
@@ -352,7 +355,8 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                 else -> Place.Field.valueOf(it.toScreamingSnakeCase())
             }
         } catch (_: IllegalArgumentException) {
-            throw IllegalArgumentException("Invalid placeField: $it")
+            Log.w(TAG, "Unsupported placeField on Android, ignoring: $it")
+            return null
         }
     }
 
@@ -388,7 +392,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             "phoneNumber" to place.nationalPhoneNumber,
             "photoMetadatas" to place.photoMetadatas?.map { photoMetadataToMap(it) },
             "plusCode" to plusCodeToMap(place.plusCode),
-            "priceLevel" to place.priceLevel,
+            "priceLevel" to place.priceLevel?.let { priceLevelToString(it) },
             "rating" to place.rating,
             "types" to place.placeTypes,
             "userRatingsTotal" to place.userRatingCount,
@@ -407,7 +411,9 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             "nationalPhoneNumber" to place.nationalPhoneNumber,
             "adrFormatAddress" to place.adrFormatAddress,
             "editorialSummary" to localizedTextToMap(place.editorialSummary, place.editorialSummaryLanguageCode),
-            "iconBackgroundColor" to place.iconBackgroundColor,
+            "iconBackgroundColor" to place.iconBackgroundColor?.let {
+                String.format("#%06X", 0xFFFFFF and it)
+            },
             "iconMaskBaseUri" to place.iconMaskUrl,
             "googleMapsUri" to place.googleMapsUri?.toString(),
             "googleMapsLinks" to googleMapsLinksToMap(place),
@@ -451,7 +457,6 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             "evChargeOptions" to evChargeOptionsToMap(place.evChargeOptions),
             "fuelOptions" to fuelOptionsToMap(place.fuelOptions),
             "priceRange" to null,
-            "priceLevelNew" to place.priceLevel?.let { priceLevelToString(it) },
 
             // Summaries & AI content
             "generativeSummary" to generativeSummaryToMap(place),
@@ -474,8 +479,8 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         }
 
         return mapOf(
-            "periods" to openingHours.periods.map { periodToMap(it) },
-            "weekdayText" to openingHours.weekdayText
+            "periods" to (openingHours.periods?.map { periodToMap(it) } ?: emptyList<Map<String, Any?>>()),
+            "weekdayText" to (openingHours.weekdayText ?: emptyList<String>())
         )
     }
 
@@ -506,13 +511,13 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
 
     private fun reviewToMap(review: Review): Map<String, Any?> {
         return mapOf(
-            "attribution" to review.attribution,
+            "attribution" to (review.attribution ?: ""),
             "authorAttribution" to authorAttributionToMap(review.authorAttribution),
             "originalText" to review.originalText,
             "originalTextLanguageCode" to review.originalTextLanguageCode,
             "rating" to review.rating,
-            "publishTime" to review.publishTime,
-            "relativePublishTimeDescription" to review.relativePublishTimeDescription,
+            "publishTime" to (review.publishTime ?: ""),
+            "relativePublishTimeDescription" to (review.relativePublishTimeDescription ?: ""),
             "text" to review.text,
             "textLanguageCode" to review.textLanguageCode
         )
@@ -524,7 +529,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         return mapOf(
             "width" to photoMetadata.width,
             "height" to photoMetadata.height,
-            "attributions" to photoMetadata.attributions,
+            "attributions" to (photoMetadata.attributions ?: ""),
             "photoReference" to photoReference,
             "authorAttributions" to photoMetadata.authorAttributions.asList().map { authorAttributionToMap(it) },
             "flagContentUri" to null,
@@ -534,9 +539,9 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
 
     private fun authorAttributionToMap(authorAttribution: AuthorAttribution): Map<String, String?> {
         return mapOf<String, String?>(
-            "name" to authorAttribution.name,
-            "photoUri" to authorAttribution.photoUri,
-            "uri" to authorAttribution.uri
+            "name" to (authorAttribution.name ?: ""),
+            "photoUri" to (authorAttribution.photoUri ?: ""),
+            "uri" to (authorAttribution.uri ?: "")
         )
     }
 
@@ -645,7 +650,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
 
     private fun moneyToMap(money: Money): Map<String, Any?> {
         return mapOf(
-            "currencyCode" to money.currencyCode,
+            "currencyCode" to (money.currencyCode ?: ""),
             "units" to money.units?.toString(),
             "nanos" to money.nanos
         )
@@ -753,10 +758,11 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             "overview" to alert.overview,
             "details" to alert.details?.let {
                 mapOf(
-                    "title" to it.title,
                     "description" to it.description,
-                    "aboutLinkTitle" to it.aboutLinkTitle,
-                    "aboutLinkUri" to it.aboutLinkUri?.toString()
+                    "link" to mapOf(
+                        "uri" to it.aboutLinkUri?.toString(),
+                        "languageCode" to null
+                    )
                 )
             },
             "languageCode" to alert.languageCode
@@ -769,8 +775,8 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         }
 
         return mapOf(
-            "compoundCode" to plusCode.compoundCode,
-            "globalCode" to plusCode.globalCode
+            "compoundCode" to (plusCode.compoundCode ?: ""),
+            "globalCode" to (plusCode.globalCode ?: "")
         )
     }
 
@@ -787,9 +793,9 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
 
     private fun addressComponentToMap(addressComponent: AddressComponent): Map<String, Any?> {
         return mapOf(
-            "name" to addressComponent.name,
-            "shortName" to addressComponent.shortName,
-            "types" to addressComponent.types
+            "name" to (addressComponent.name ?: ""),
+            "shortName" to (addressComponent.shortName ?: ""),
+            "types" to (addressComponent.types ?: emptyList<String>())
         )
     }
 
@@ -862,6 +868,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     companion object {
+        private const val TAG = "FlutterGooglePlacesSdk"
         private const val METHOD_INITIALIZE = "initialize"
         private const val METHOD_UPDATE_SETTINGS = "updateSettings"
         private const val METHOD_DEINITIALIZE = "deinitialize"
