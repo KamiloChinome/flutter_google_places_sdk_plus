@@ -7,7 +7,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'google_places_sdk_plus_ios'
-  s.version          = '0.3.0'
+  s.version          = '0.3.1'
   s.summary          = 'iOS implementation of the Flutter Google Places SDK plugin.'
   s.description      = <<-DESC
 iOS implementation of the Flutter Google Places SDK plugin, providing access to the

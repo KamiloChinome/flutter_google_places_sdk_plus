@@ -1,3 +1,7 @@
+## 0.3.1
+
+* Fix: Corrected Swift generated header import in `FlutterGooglePlacesSdkIosPlugin.m` — was referencing old module name `flutter_google_places_sdk_ios` instead of `google_places_sdk_plus_ios`, causing `'flutter_google_places_sdk_ios-Swift.h' file not found` build error.
+
 ## 0.3.0
 
 Initial release of `google_places_sdk_plus_ios`.

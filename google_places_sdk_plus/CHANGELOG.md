@@ -1,3 +1,7 @@
+## 0.5.2
+
+* Fix: iOS build failure — `'flutter_google_places_sdk_ios-Swift.h' file not found`. Updated `google_places_sdk_plus_ios` to `0.3.1`.
+
 ## 0.5.1
 
 * Improved README with fork context, full feature list, and additional usage examples.
