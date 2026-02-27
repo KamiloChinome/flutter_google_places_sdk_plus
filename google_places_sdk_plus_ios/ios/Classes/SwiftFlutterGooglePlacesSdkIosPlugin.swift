@@ -97,6 +97,10 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
             let request = GMSFetchPlaceRequest(placeID: placeId, placeProperties: properties, sessionToken: sessionToken)
             
             placesClient.fetchPlace(with: request) { (place, error) in
+                // End session after fetchPlace (billing optimization).
+                // The next autocomplete call will create a new session token.
+                self.lastSessionToken = nil
+
                 if let error = error {
                     print("fetchPlace error: \(error)")
                     result(FlutterError(

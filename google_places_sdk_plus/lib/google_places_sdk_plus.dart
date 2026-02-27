@@ -121,8 +121,13 @@ class FlutterGooglePlacesSdk {
   Future<FetchPlaceResponse> fetchPlace(
     String placeId, {
     required List<PlaceField> fields,
+    bool? newSessionToken,
   }) {
-    return _addMethodCall(() => platform.fetchPlace(placeId, fields: fields));
+    return _addMethodCall(() => platform.fetchPlace(
+          placeId,
+          fields: fields,
+          newSessionToken: newSessionToken,
+        ));
   }
 
   /// Fetches a photo of a place.

@@ -145,6 +145,10 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                     .setRegionCode(regionCode)
                     .build()
                 client!!.fetchPlace(request).addOnCompleteListener { task ->
+                    // End session after fetchPlace (billing optimization).
+                    // The next autocomplete call will create a new session token.
+                    lastSessionToken = null
+
                     if (task.isSuccessful) {
                         val place = placeToMap(task.result?.place)
                         print("FetchPlace Result: $place")

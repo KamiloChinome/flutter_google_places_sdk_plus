@@ -1,3 +1,7 @@
+## 0.5.4
+
+* Fix: expose `newSessionToken` parameter in `fetchPlace()` — it was already defined in the platform interface but missing from the public API, preventing users from explicitly controlling session lifecycle.
+
 ## 0.5.3
 
 * Fix: exceptions thrown by the library (e.g. network errors, API errors) were propagated twice — once to the caller's `try-catch` and again as an unhandled exception reaching `PlatformDispatcher.onError` / Crashlytics. Removed erroneous `throw` in `_waitFor` so errors are only delivered through the returned Future.
