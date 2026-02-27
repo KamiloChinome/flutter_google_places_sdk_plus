@@ -1,3 +1,7 @@
+## 0.4.1
+
+* Fix: session token was not cleared after `fetchPlace()`, causing subsequent autocomplete searches to reuse a stale token and break session billing boundaries. The token is now invalidated after every `fetchPlace()` call.
+
 ## 0.4.0
 
 Initial release of `google_places_sdk_plus_android`.
