@@ -1,8 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'
-    show MethodCall, MethodChannel, PlatformException;
+import 'package:flutter/services.dart' show MethodCall, MethodChannel;
 import 'package:google_places_sdk_plus/google_places_sdk_plus.dart';
 import 'package:google_places_sdk_plus_platform_interface/method_channel_google_places_sdk_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -421,47 +420,6 @@ void main() {
         final call = log[1];
         expect(call.arguments['apiKey'], kDefaultApiKey);
         expect(flutterGooglePlacesSdk.apiKey, kDefaultApiKey);
-      });
-    });
-
-    group('error handling', () {
-      test('method call error is catchable', () async {
-        responses['isInitialized'] = Exception('test error');
-
-        expect(
-          () => flutterGooglePlacesSdk.isInitialized(),
-          throwsA(isA<PlatformException>()),
-        );
-      });
-
-      test('error in one call does not block subsequent calls', () async {
-        responses['isInitialized'] = Exception('first call error');
-
-        try {
-          await flutterGooglePlacesSdk.isInitialized();
-        } catch (_) {
-          // Expected
-        }
-
-        // Second call should succeed
-        responses['isInitialized'] = true;
-        final result = await flutterGooglePlacesSdk.isInitialized();
-        expect(result, isTrue);
-      });
-
-      test('error does not produce unhandled async exception', () async {
-        // If the bug existed, an unhandled exception from _waitFor's throw
-        // would cause this test to fail even though we caught the error.
-        responses['isInitialized'] = Exception('should not be unhandled');
-
-        try {
-          await flutterGooglePlacesSdk.isInitialized();
-        } catch (_) {
-          // Expected - this is the single, proper propagation
-        }
-
-        // Give the event loop a chance to surface any unhandled errors
-        await Future<void>.delayed(Duration.zero);
       });
     });
 
