@@ -53,9 +53,9 @@ class FlutterGooglePlacesSdk {
   static Future<void> _waitFor(Future<void> future) {
     final Completer<void> completer = Completer<void>();
     future.whenComplete(completer.complete).catchError((dynamic err) {
-      // Ignore if previous call completed with an error.
+      // Error is already delivered to the caller via the original future.
+      // Swallow here to prevent an unhandled async error.
       log('FlutterGooglePlacesSdk::call error: $err');
-      throw err;
     });
     return completer.future;
   }
