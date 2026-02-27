@@ -1,3 +1,7 @@
+## 0.5.3
+
+* Fix: exceptions thrown by the library (e.g. network errors, API errors) were propagated twice — once to the caller's `try-catch` and again as an unhandled exception reaching `PlatformDispatcher.onError` / Crashlytics. Removed erroneous `throw` in `_waitFor` so errors are only delivered through the returned Future.
+
 ## 0.5.2
 
 * Fix: iOS build failure — `'flutter_google_places_sdk_ios-Swift.h' file not found`. Updated `google_places_sdk_plus_ios` to `0.3.1`.
