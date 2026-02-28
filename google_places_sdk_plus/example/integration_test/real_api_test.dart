@@ -25,29 +25,33 @@ void main() {
         sdk = FlutterGooglePlacesSdk(apiKey);
       });
 
-      testWidgets('isInitialized returns true after creation',
-          (WidgetTester tester) async {
+      testWidgets('isInitialized returns true after creation', (
+        WidgetTester tester,
+      ) async {
         final result = await sdk.isInitialized();
         expect(result, isTrue);
       });
 
-      testWidgets('findAutocompletePredictions returns results for known query',
-          (WidgetTester tester) async {
-        final result = await sdk.findAutocompletePredictions(
-          'Eiffel Tower',
-          countries: ['FR'],
-        );
-        expect(result.predictions, isNotEmpty);
-        expect(
-          result.predictions.any(
-            (p) => p.fullText.toLowerCase().contains('eiffel'),
-          ),
-          isTrue,
-        );
-      });
+      testWidgets(
+        'findAutocompletePredictions returns results for known query',
+        (WidgetTester tester) async {
+          final result = await sdk.findAutocompletePredictions(
+            'Eiffel Tower',
+            countries: ['FR'],
+          );
+          expect(result.predictions, isNotEmpty);
+          expect(
+            result.predictions.any(
+              (p) => p.fullText?.toLowerCase().contains('eiffel') ?? false,
+            ),
+            isTrue,
+          );
+        },
+      );
 
-      testWidgets('fetchPlace returns details for known place ID',
-          (WidgetTester tester) async {
+      testWidgets('fetchPlace returns details for known place ID', (
+        WidgetTester tester,
+      ) async {
         // Eiffel Tower place ID
         final result = await sdk.fetchPlace(
           'ChIJLU7jZClu5kcR4PcOOO6p3I0',
@@ -64,28 +68,21 @@ void main() {
         expect(result.place!.latLng, isNotNull);
       });
 
-      testWidgets('searchByText returns results',
-          (WidgetTester tester) async {
+      testWidgets('searchByText returns results', (WidgetTester tester) async {
         final result = await sdk.searchByText(
           'pizza restaurant in Paris',
-          fields: [
-            PlaceField.Id,
-            PlaceField.DisplayName,
-            PlaceField.Rating,
-          ],
+          fields: [PlaceField.Id, PlaceField.DisplayName, PlaceField.Rating],
           maxResultCount: 5,
         );
         expect(result.places, isNotEmpty);
         expect(result.places.length, lessThanOrEqualTo(5));
       });
 
-      testWidgets('searchNearby returns results around known location',
-          (WidgetTester tester) async {
+      testWidgets('searchNearby returns results around known location', (
+        WidgetTester tester,
+      ) async {
         final result = await sdk.searchNearby(
-          fields: [
-            PlaceField.Id,
-            PlaceField.DisplayName,
-          ],
+          fields: [PlaceField.Id, PlaceField.DisplayName],
           locationRestriction: const CircularBounds(
             center: LatLng(lat: 48.8584, lng: 2.2945), // Near Eiffel Tower
             radius: 500,
@@ -95,17 +92,19 @@ void main() {
         expect(result.places, isNotEmpty);
       });
 
-      testWidgets('findAutocompletePredictions with empty query returns empty',
-          (WidgetTester tester) async {
-        // Some platforms may throw for empty queries; test graceful handling
-        try {
-          final result = await sdk.findAutocompletePredictions('');
-          // If it doesn't throw, predictions should be empty
-          expect(result.predictions, isEmpty);
-        } on Exception {
-          // Expected — empty query may throw on some platforms
-        }
-      });
+      testWidgets(
+        'findAutocompletePredictions with empty query returns empty',
+        (WidgetTester tester) async {
+          // Some platforms may throw for empty queries; test graceful handling
+          try {
+            final result = await sdk.findAutocompletePredictions('');
+            // If it doesn't throw, predictions should be empty
+            expect(result.predictions, isEmpty);
+          } on Exception {
+            // Expected — empty query may throw on some platforms
+          }
+        },
+      );
     },
   );
 }

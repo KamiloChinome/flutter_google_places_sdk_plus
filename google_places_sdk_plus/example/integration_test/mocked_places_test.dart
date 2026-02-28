@@ -44,61 +44,59 @@ void main() {
 
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-      const MethodChannel(channelName),
-      (MethodCall call) async {
-        switch (call.method) {
-          case 'initialize':
-            return null;
-          case 'isInitialized':
-            return true;
-          case 'findAutocompletePredictions':
-            return <Map<String, dynamic>>[mockPrediction];
-          case 'fetchPlace':
-            return mockPlace;
-          case 'fetchPlacePhoto':
-            return 'https://example.com/photo.jpg';
-          case 'searchByText':
-            return <Map<String, dynamic>>[mockPlace];
-          case 'searchNearby':
-            return <Map<String, dynamic>>[mockPlace];
-          default:
-            return null;
-        }
-      },
-    );
+        .setMockMethodCallHandler(const MethodChannel(channelName), (
+          MethodCall call,
+        ) async {
+          switch (call.method) {
+            case 'initialize':
+              return null;
+            case 'isInitialized':
+              return true;
+            case 'findAutocompletePredictions':
+              return <Map<String, dynamic>>[mockPrediction];
+            case 'fetchPlace':
+              return mockPlace;
+            case 'fetchPlacePhoto':
+              return 'https://example.com/photo.jpg';
+            case 'searchByText':
+              return <Map<String, dynamic>>[mockPlace];
+            case 'searchNearby':
+              return <Map<String, dynamic>>[mockPlace];
+            default:
+              return null;
+          }
+        });
     sdk = FlutterGooglePlacesSdk('test-api-key');
   });
 
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-      const MethodChannel(channelName),
-      null,
-    );
+        .setMockMethodCallHandler(const MethodChannel(channelName), null);
   });
 
   group('Mocked Integration Tests', () {
-    testWidgets('initialize and check isInitialized',
-        (WidgetTester tester) async {
+    testWidgets('initialize and check isInitialized', (
+      WidgetTester tester,
+    ) async {
       final result = await sdk.isInitialized();
       expect(result, isTrue);
     });
 
-    testWidgets('findAutocompletePredictions returns predictions',
-        (WidgetTester tester) async {
+    testWidgets('findAutocompletePredictions returns predictions', (
+      WidgetTester tester,
+    ) async {
       final result = await sdk.findAutocompletePredictions('Sydney');
       expect(result.predictions, isNotEmpty);
-      expect(result.predictions.first.placeId,
-          'ChIJN1t_tDeuEmsRUsoyG83frY4');
+      expect(result.predictions.first.placeId, 'ChIJN1t_tDeuEmsRUsoyG83frY4');
       expect(result.predictions.first.primaryText, 'Test Place');
       expect(result.predictions.first.secondaryText, 'Test City');
       expect(result.predictions.first.fullText, 'Test Place, Test City');
       expect(result.predictions.first.distanceMeters, 12345);
     });
 
-    testWidgets('fetchPlace returns place details',
-        (WidgetTester tester) async {
+    testWidgets('fetchPlace returns place details', (
+      WidgetTester tester,
+    ) async {
       final result = await sdk.fetchPlace(
         'ChIJN1t_tDeuEmsRUsoyG83frY4',
         fields: [PlaceField.Id, PlaceField.DisplayName, PlaceField.Location],
@@ -132,8 +130,9 @@ void main() {
       expect(result.places.first.id, 'ChIJN1t_tDeuEmsRUsoyG83frY4');
     });
 
-    testWidgets('findAutocompletePredictions with all parameters',
-        (WidgetTester tester) async {
+    testWidgets('findAutocompletePredictions with all parameters', (
+      WidgetTester tester,
+    ) async {
       final result = await sdk.findAutocompletePredictions(
         'coffee shop',
         countries: ['US'],
@@ -148,8 +147,7 @@ void main() {
       expect(result.predictions, isNotEmpty);
     });
 
-    testWidgets('fetchPlace with newSessionToken',
-        (WidgetTester tester) async {
+    testWidgets('fetchPlace with newSessionToken', (WidgetTester tester) async {
       final result = await sdk.fetchPlace(
         'test-place-id',
         fields: [PlaceField.Id],
@@ -160,47 +158,47 @@ void main() {
   });
 
   group('Edge case tests', () {
-    testWidgets('findAutocompletePredictions with empty results',
-        (WidgetTester tester) async {
+    testWidgets('findAutocompletePredictions with empty results', (
+      WidgetTester tester,
+    ) async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(
-        const MethodChannel(channelName),
-        (MethodCall call) async {
-          switch (call.method) {
-            case 'initialize':
-              return null;
-            case 'findAutocompletePredictions':
-              return <Map<String, dynamic>>[];
-            default:
-              return null;
-          }
-        },
-      );
+          .setMockMethodCallHandler(const MethodChannel(channelName), (
+            MethodCall call,
+          ) async {
+            switch (call.method) {
+              case 'initialize':
+                return null;
+              case 'findAutocompletePredictions':
+                return <Map<String, dynamic>>[];
+              default:
+                return null;
+            }
+          });
 
       final newSdk = FlutterGooglePlacesSdk('test-key');
       final result = await newSdk.findAutocompletePredictions('xyzabc123');
       expect(result.predictions, isEmpty);
     });
 
-    testWidgets('fetchPlace handles PlatformException',
-        (WidgetTester tester) async {
+    testWidgets('fetchPlace handles PlatformException', (
+      WidgetTester tester,
+    ) async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(
-        const MethodChannel(channelName),
-        (MethodCall call) async {
-          switch (call.method) {
-            case 'initialize':
-              return null;
-            case 'fetchPlace':
-              throw PlatformException(
-                code: 'API_ERROR_PLACE',
-                message: 'Place not found',
-              );
-            default:
-              return null;
-          }
-        },
-      );
+          .setMockMethodCallHandler(const MethodChannel(channelName), (
+            MethodCall call,
+          ) async {
+            switch (call.method) {
+              case 'initialize':
+                return null;
+              case 'fetchPlace':
+                throw PlatformException(
+                  code: 'API_ERROR_PLACE',
+                  message: 'Place not found',
+                );
+              default:
+                return null;
+            }
+          });
 
       final newSdk = FlutterGooglePlacesSdk('test-key');
       expect(
@@ -209,22 +207,20 @@ void main() {
       );
     });
 
-    testWidgets('searchByText with empty results',
-        (WidgetTester tester) async {
+    testWidgets('searchByText with empty results', (WidgetTester tester) async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(
-        const MethodChannel(channelName),
-        (MethodCall call) async {
-          switch (call.method) {
-            case 'initialize':
-              return null;
-            case 'searchByText':
-              return <Map<String, dynamic>>[];
-            default:
-              return null;
-          }
-        },
-      );
+          .setMockMethodCallHandler(const MethodChannel(channelName), (
+            MethodCall call,
+          ) async {
+            switch (call.method) {
+              case 'initialize':
+                return null;
+              case 'searchByText':
+                return <Map<String, dynamic>>[];
+              default:
+                return null;
+            }
+          });
 
       final newSdk = FlutterGooglePlacesSdk('test-key');
       final result = await newSdk.searchByText(

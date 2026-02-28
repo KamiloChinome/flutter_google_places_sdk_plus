@@ -1,7 +1,9 @@
 .DS_Store
 .atom/
 .idea/
-.vscode/
+# Keep .vscode/settings.json tracked for shared project config
+.vscode/*
+!.vscode/settings.json
 
 .packages
 .pub/
