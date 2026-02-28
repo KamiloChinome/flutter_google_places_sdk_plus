@@ -18,7 +18,6 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
     private var lastSessionToken: GMSAutocompleteSessionToken?
     
     private var photosCache: Dictionary<String, GMSPlacePhotoMetadata> = [:]
-    private var runningUid: Int = 1
     
     private var initializedApiKey: String?
 
@@ -43,6 +42,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
         case METHOD_DEINITIALIZE:
             placesClient = nil
             initializedApiKey = nil
+            photosCache.removeAll()
             result(nil)
         case METHOD_IS_INITIALIZE:
             result(placesClient != nil)
@@ -125,6 +125,14 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
             }
             let maxWidth = args["maxWidth"] as? Int
             let maxHeight = args["maxHeight"] as? Int
+            if let maxWidth = maxWidth, maxWidth <= 0 {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "maxWidth must be positive, got \(maxWidth)", details: nil))
+                return
+            }
+            if let maxHeight = maxHeight, maxHeight <= 0 {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "maxHeight must be positive, got \(maxHeight)", details: nil))
+                return
+            }
             let maxSize = CGSize(
                 width: maxWidth ?? 4800,
                 height: maxHeight ?? 4800
@@ -228,6 +236,20 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
                 return GMSPlaceField(rawValue: partialResult.rawValue | field.rawValue)
             }) ?? GMSPlaceField.all
             let locationRestrictionMap = args["locationRestriction"] as? Dictionary<String, Any?>
+            if let centerMap = locationRestrictionMap?["center"] as? Dictionary<String, Any?> {
+                if let lat = centerMap["lat"] as? Double, lat < -90.0 || lat > 90.0 {
+                    result(FlutterError(code: "INVALID_ARGUMENTS", message: "center latitude must be between -90 and 90, got \(lat)", details: nil))
+                    return
+                }
+                if let lng = centerMap["lng"] as? Double, lng < -180.0 || lng > 180.0 {
+                    result(FlutterError(code: "INVALID_ARGUMENTS", message: "center longitude must be between -180 and 180, got \(lng)", details: nil))
+                    return
+                }
+            }
+            if let radiusVal = locationRestrictionMap?["radius"] as? Double, radiusVal <= 0.0 {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "radius must be positive, got \(radiusVal)", details: nil))
+                return
+            }
             let excludedPrimaryTypes = args["excludedPrimaryTypes"] as? [String] ?? []
             let excludedTypes = args["excludedTypes"] as? [String] ?? []
             let includedPrimaryTypes = args["includedPrimaryTypes"] as? [String] ?? []
@@ -512,9 +534,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
     }
     
     private func _getPhotoReference() -> String {
-        let num = runningUid
-        runningUid += 1
-        return "id_" + String(num);
+        return UUID().uuidString
     }
     
     // MARK: - Opening hours

@@ -1,3 +1,11 @@
+## 0.5.6
+
+* Document per-platform field availability in README
+* Update desktop READMEs — `fetchPlace` and `fetchPlacePhoto` are fully supported
+* Photo references now use UUIDs instead of incrementing counters (Android, iOS)
+* Photo metadata cache is properly cleared on `deinitialize()` (Android, iOS)
+* Input validation: coordinates, radius, and photo dimensions return `FlutterError` for invalid values
+
 ## 0.5.5
 
 * Fix cross-platform inconsistencies between Android and iOS native plugins:

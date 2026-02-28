@@ -72,6 +72,59 @@ Other plugins use HTTP web requests rather than the native SDK. Google allows yo
 
 This plugin uses native SDKs on mobile platforms for better security, and falls back to HTTP/REST on desktop platforms.
 
+## Platform Field Availability
+
+Not all `PlaceField` values are available on every platform. This is due to differences in the underlying SDKs (Android Places SDK, iOS Places SDK, Maps JavaScript API) — not limitations of this plugin.
+
+Fields not listed below are supported on all platforms.
+
+### Fields with limited support
+
+| Field | Android | iOS | Web | Desktop |
+|-------|:-------:|:---:|:---:|:-------:|
+| `PrimaryType` | Yes | No | Yes | Yes |
+| `PrimaryTypeDisplayName` | Yes | No | Yes | Yes |
+| `ShortFormattedAddress` | Yes | No | No | Yes |
+| `InternationalPhoneNumber` | Yes | No | Yes | Yes |
+| `AdrFormatAddress` | Yes | No | Yes | Yes |
+| `GoogleMapsUri` | Yes | No | Yes | Yes |
+| `GoogleMapsLinks` | Yes | No | No | Yes |
+| `TimeZone` | Yes | No | No | Yes |
+| `CurrentSecondaryOpeningHours` | Yes | No | No | Yes |
+| `PureServiceAreaBusiness` | Yes | No¹ | No | Yes |
+| `ServesCocktails` | Yes | No | Yes | Yes |
+| `ServesCoffee` | Yes | No | Yes | Yes |
+| `ServesDessert` | Yes | No | Yes | Yes |
+| `GoodForChildren` | Yes | No | Yes | Yes |
+| `AllowsDogs` | Yes | No | Yes | Yes |
+| `Restroom` | Yes | No | Yes | Yes |
+| `GoodForGroups` | Yes | No | Yes | Yes |
+| `GoodForWatchingSports` | Yes | No | Yes | Yes |
+| `LiveMusic` | Yes | No | Yes | Yes |
+| `OutdoorSeating` | Yes | No | Yes | Yes |
+| `MenuForChildren` | Yes | No | Yes | Yes |
+| `PaymentOptions` | Yes | No | No | Yes |
+| `ParkingOptions` | Yes | No | No | Yes |
+| `EvChargeOptions` | Yes | No | No | Yes |
+| `FuelOptions` | Yes | No | No | Yes |
+| `PriceRange` | Yes | No | No | Yes |
+| `AccessibilityOptions` | Yes | Partial² | No | Yes |
+| `GenerativeSummary` | Yes | No | No | Yes |
+| `ReviewSummary` | Yes | No | No | Yes |
+| `NeighborhoodSummary` | Yes | No | No | Yes |
+| `EvChargeAmenitySummary` | Yes | No | No | Yes |
+| `PostalAddress` | Yes | No | No | Yes |
+| `SubDestinations` | Yes | No | No | Yes |
+| `ContainingPlaces` | Yes | No | No | Yes |
+| `AddressDescriptor` | Yes | No | No | Yes |
+| `ConsumerAlerts` | Yes | No | No | Yes |
+
+**Notes:**
+1. iOS SDK exposes `pureServiceAreaBusiness` but it always returns `nil` in current versions.
+2. iOS `AccessibilityOptions` only provides `wheelchairAccessibleEntrance`; the other three sub-fields (`wheelchairAccessibleParking`, `wheelchairAccessibleRestroom`, `wheelchairAccessibleSeating`) return `nil`.
+
+**Desktop** = Linux, macOS, Windows (all use the REST API via `google_places_sdk_plus_http`).
+
 ## Package Structure
 
 This is a federated plugin. The app-facing package (`google_places_sdk_plus`) depends on the following packages:
