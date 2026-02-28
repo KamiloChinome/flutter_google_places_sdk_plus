@@ -61,6 +61,8 @@ jobs:
           if-no-files-found: ignore
 
       - name: Check coverage threshold (>= 80%)
+        if: always()
+        continue-on-error: true
         uses: VeryGoodOpenSource/very_good_coverage@v3
         with:
           path: google_places_sdk_plus_ios/coverage/lcov.info

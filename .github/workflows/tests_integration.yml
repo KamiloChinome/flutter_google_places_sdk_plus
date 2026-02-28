@@ -47,7 +47,7 @@ jobs:
         working-directory: google_places_sdk_plus/example
 
       - name: Run mocked integration tests
-        run: flutter test integration_test/mocked_places_test.dart
+        run: flutter test integration_test/mocked_places_test.dart -d linux
         working-directory: google_places_sdk_plus/example
 
   real-api-android:
