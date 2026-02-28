@@ -454,7 +454,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
     
     // MARK: - Helper: LocalizedText
     
-    private func localizedTextToMap(text: String?, languageCode: String?) -> Dictionary<String, Any?>? {
+    func localizedTextToMap(text: String?, languageCode: String?) -> Dictionary<String, Any?>? {
         guard let text = text else { return nil }
         return [
             "text": text,
@@ -464,7 +464,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
     
     // MARK: - PriceLevel
 
-    private func priceLevelToString(priceLevel: GMSPlacesPriceLevel) -> String? {
+    func priceLevelToString(priceLevel: GMSPlacesPriceLevel) -> String? {
         switch priceLevel {
         case .free:
             return "PRICE_LEVEL_FREE"
@@ -483,7 +483,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
 
     // MARK: - Business status
 
-    private func businessStatusToStr(it: GMSPlacesBusinessStatus) -> String? {
+    func businessStatusToStr(it: GMSPlacesBusinessStatus) -> String? {
         switch (it) {
         case GMSPlacesBusinessStatus.operational:
             return "OPERATIONAL";
@@ -566,7 +566,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
         ]
     }
     
-    private func dayOfWeekToStr(it: GMSDayOfWeek) -> String {
+    func dayOfWeekToStr(it: GMSDayOfWeek) -> String {
         switch (it) {
         case GMSDayOfWeek.sunday: return "SUNDAY";
         case GMSDayOfWeek.monday: return "MONDAY";
@@ -588,7 +588,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
     
     // MARK: - Geometry helpers
     
-    private func latLngToMap(coordinate: CLLocationCoordinate2D?) -> Any? {
+    func latLngToMap(coordinate: CLLocationCoordinate2D?) -> Any? {
         guard let coordinate = coordinate else {
             return nil
         }
@@ -618,7 +618,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
     
     // MARK: - PlaceField mapping
     
-    private func placeFieldFromStr(it: String) -> GMSPlaceField {
+    func placeFieldFromStr(it: String) -> GMSPlaceField {
         switch (it) {
         // Core / legacy fields
         case "FormattedAddress", "ADDRESS", "FORMATTED_ADDRESS": return GMSPlaceField.formattedAddress
@@ -830,7 +830,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
         return GMSPlaceCircularLocationOption(center.coordinate, radius)
     }
     
-    private func latLngFromMap(argument: Dictionary<String, Any?>?) -> CLLocation? {
+    func latLngFromMap(argument: Dictionary<String, Any?>?) -> CLLocation? {
         guard let argument = argument,
               let lat = argument["lat"] as? Double,
               let lng = argument["lng"] as? Double else {
