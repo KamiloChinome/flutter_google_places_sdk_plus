@@ -43,6 +43,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import java.util.Locale
+import java.util.UUID
 
 /** FlutterGooglePlacesSdkPlugin */
 class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
@@ -51,7 +52,6 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var applicationContext: Context
 
     private var photosCache = mutableMapOf<String, PhotoMetadata>()
-    private var runningUid = 1
 
     private var lastSessionToken: AutocompleteSessionToken? = null
     private var initializedApiKey: String? = null
@@ -88,6 +88,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             METHOD_DEINITIALIZE -> {
                 client = null
                 initializedApiKey = null
+                photosCache.clear()
                 Places.deinitialize()
                 result.success(null)
             }
@@ -175,6 +176,14 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                 }
                 val maxWidth = call.argument<Int>("maxWidth")
                 val maxHeight = call.argument<Int>("maxHeight")
+                if (maxWidth != null && maxWidth <= 0) {
+                    result.error("INVALID_ARGUMENTS", "maxWidth must be positive, got $maxWidth", null)
+                    return
+                }
+                if (maxHeight != null && maxHeight <= 0) {
+                    result.error("INVALID_ARGUMENTS", "maxHeight must be positive, got $maxHeight", null)
+                    return
+                }
 
                 val request = FetchResolvedPhotoUriRequest.builder(photoMetadata)
                     .setMaxWidth(maxWidth)
@@ -250,8 +259,25 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             METHOD_NEARBY_SEARCH -> {
                 val fields = call.argument<List<String>>("fields")?.mapNotNull { placeFieldFromStr(it) }
                     ?: emptyList()
-                val locationRestriction =
-                    circularBoundsFromMap(call.argument<Map<String, Any?>>("locationRestriction"))
+                val locationRestrictionArg = call.argument<Map<String, Any?>>("locationRestriction")
+                @Suppress("UNCHECKED_CAST")
+                val centerMap = locationRestrictionArg?.get("center") as? Map<String, Any?>
+                val centerLat = centerMap?.get("lat") as? Double
+                val centerLng = centerMap?.get("lng") as? Double
+                if (centerLat != null && (centerLat < -90.0 || centerLat > 90.0)) {
+                    result.error("INVALID_ARGUMENTS", "center latitude must be between -90 and 90, got $centerLat", null)
+                    return
+                }
+                if (centerLng != null && (centerLng < -180.0 || centerLng > 180.0)) {
+                    result.error("INVALID_ARGUMENTS", "center longitude must be between -180 and 180, got $centerLng", null)
+                    return
+                }
+                val radiusVal = locationRestrictionArg?.get("radius") as? Double
+                if (radiusVal != null && radiusVal <= 0.0) {
+                    result.error("INVALID_ARGUMENTS", "radius must be positive, got $radiusVal", null)
+                    return
+                }
+                val locationRestriction = circularBoundsFromMap(locationRestrictionArg)
                 if (locationRestriction == null) {
                     result.error("INVALID_ARGUMENTS", "locationRestriction is required for searchNearby", null)
                     return
@@ -569,8 +595,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     private fun getPhotoReference(): String {
-        val num = runningUid++
-        return "id_$num"
+        return UUID.randomUUID().toString()
     }
 
     // ===== Helper to convert BooleanPlaceAttributeValue to Boolean? =====

@@ -1,3 +1,9 @@
+## 0.4.3
+
+* Use UUID for photo references instead of incrementing counter
+* Clear photo metadata cache on `deinitialize()`
+* Validate coordinate ranges, radius, and photo dimensions — return `FlutterError` for invalid values
+
 ## 0.4.2
 
 * Remove all `print()` debug statements from native plugin
