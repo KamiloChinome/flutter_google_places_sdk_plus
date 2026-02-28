@@ -50,9 +50,9 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
-//    testOptions {
-//        unitTests.includeAndroidResources = true
-//    }
+    testOptions {
+        unitTests.includeAndroidResources = true
+    }
 }
 
 dependencies {
