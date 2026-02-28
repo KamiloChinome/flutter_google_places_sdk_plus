@@ -36,11 +36,67 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y ninja-build libgtk-3-dev
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+
+      # Monorepo: generate freezed/json_serializable code
+      - name: Generate code (platform_interface)
+        run: |
+          cd google_places_sdk_plus_platform_interface
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      # Monorepo: override deps to use local packages
+      - name: Setup local dependency overrides
+        run: |
+          cat > google_places_sdk_plus/pubspec_overrides.yaml << 'YAML'
+          dependency_overrides:
+            google_places_sdk_plus_platform_interface:
+              path: ../google_places_sdk_plus_platform_interface
+            google_places_sdk_plus_android:
+              path: ../google_places_sdk_plus_android
+            google_places_sdk_plus_ios:
+              path: ../google_places_sdk_plus_ios
+            google_places_sdk_plus_web:
+              path: ../google_places_sdk_plus_web
+            google_places_sdk_plus_http:
+              path: ../google_places_sdk_plus_http
+            google_places_sdk_plus_linux:
+              path: ../google_places_sdk_plus_linux
+            google_places_sdk_plus_macos:
+              path: ../google_places_sdk_plus_macos
+            google_places_sdk_plus_windows:
+              path: ../google_places_sdk_plus_windows
+          YAML
+          cat > google_places_sdk_plus/example/pubspec_overrides.yaml << 'YAML'
+          dependency_overrides:
+            google_places_sdk_plus:
+              path: ../../google_places_sdk_plus
+            google_places_sdk_plus_platform_interface:
+              path: ../../google_places_sdk_plus_platform_interface
+            google_places_sdk_plus_android:
+              path: ../../google_places_sdk_plus_android
+            google_places_sdk_plus_ios:
+              path: ../../google_places_sdk_plus_ios
+            google_places_sdk_plus_web:
+              path: ../../google_places_sdk_plus_web
+            google_places_sdk_plus_http:
+              path: ../../google_places_sdk_plus_http
+            google_places_sdk_plus_linux:
+              path: ../../google_places_sdk_plus_linux
+            google_places_sdk_plus_macos:
+              path: ../../google_places_sdk_plus_macos
+            google_places_sdk_plus_windows:
+              path: ../../google_places_sdk_plus_windows
+          YAML
 
       - name: Install dependencies
         run: flutter pub get
@@ -70,6 +126,37 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+
+      # Monorepo: generate freezed/json_serializable code
+      - name: Generate code (platform_interface)
+        run: |
+          cd google_places_sdk_plus_platform_interface
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      # Monorepo: override deps to use local packages
+      - name: Setup local dependency overrides
+        run: |
+          cat > google_places_sdk_plus/pubspec_overrides.yaml << 'YAML'
+          dependency_overrides:
+            google_places_sdk_plus_platform_interface:
+              path: ../google_places_sdk_plus_platform_interface
+            google_places_sdk_plus_android:
+              path: ../google_places_sdk_plus_android
+            google_places_sdk_plus_ios:
+              path: ../google_places_sdk_plus_ios
+          YAML
+          cat > google_places_sdk_plus/example/pubspec_overrides.yaml << 'YAML'
+          dependency_overrides:
+            google_places_sdk_plus:
+              path: ../../google_places_sdk_plus
+            google_places_sdk_plus_platform_interface:
+              path: ../../google_places_sdk_plus_platform_interface
+            google_places_sdk_plus_android:
+              path: ../../google_places_sdk_plus_android
+            google_places_sdk_plus_ios:
+              path: ../../google_places_sdk_plus_ios
+          YAML
 
       - name: Install dependencies
         run: flutter pub get

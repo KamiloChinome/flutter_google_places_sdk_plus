@@ -44,10 +44,9 @@ jobs:
           - google_places_sdk_plus_windows
           - google_places_sdk_plus_web
         include:
-          - package: google_places_sdk_plus_platform_interface
-            needs_build_runner: true
           - package: google_places_sdk_plus_web
             test_args: '--platform chrome'
+            skip_coverage: true
 
     steps:
       - name: Checkout code
@@ -62,6 +61,68 @@ jobs:
       - name: Flutter version
         run: flutter --version
 
+      # Monorepo: generate freezed/json_serializable code for packages that need it
+      - name: Generate code (platform_interface)
+        run: |
+          cd google_places_sdk_plus_platform_interface
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Generate code (http)
+        run: |
+          cd google_places_sdk_plus_http
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      # Monorepo: override deps to use local packages (fork API may differ from pub.dev)
+      - name: Setup local dependency overrides
+        run: |
+          cat > ${{ matrix.package }}/pubspec_overrides.yaml << 'YAML'
+          dependency_overrides:
+            google_places_sdk_plus:
+              path: ../google_places_sdk_plus
+            google_places_sdk_plus_platform_interface:
+              path: ../google_places_sdk_plus_platform_interface
+            google_places_sdk_plus_android:
+              path: ../google_places_sdk_plus_android
+            google_places_sdk_plus_ios:
+              path: ../google_places_sdk_plus_ios
+            google_places_sdk_plus_web:
+              path: ../google_places_sdk_plus_web
+            google_places_sdk_plus_http:
+              path: ../google_places_sdk_plus_http
+            google_places_sdk_plus_linux:
+              path: ../google_places_sdk_plus_linux
+            google_places_sdk_plus_macos:
+              path: ../google_places_sdk_plus_macos
+            google_places_sdk_plus_windows:
+              path: ../google_places_sdk_plus_windows
+          YAML
+          # Also for example app if it exists (paths are relative to example/)
+          if [ -d "${{ matrix.package }}/example" ]; then
+            cat > ${{ matrix.package }}/example/pubspec_overrides.yaml << 'YAML'
+            dependency_overrides:
+              google_places_sdk_plus:
+                path: ../../google_places_sdk_plus
+              google_places_sdk_plus_platform_interface:
+                path: ../../google_places_sdk_plus_platform_interface
+              google_places_sdk_plus_android:
+                path: ../../google_places_sdk_plus_android
+              google_places_sdk_plus_ios:
+                path: ../../google_places_sdk_plus_ios
+              google_places_sdk_plus_web:
+                path: ../../google_places_sdk_plus_web
+              google_places_sdk_plus_http:
+                path: ../../google_places_sdk_plus_http
+              google_places_sdk_plus_linux:
+                path: ../../google_places_sdk_plus_linux
+              google_places_sdk_plus_macos:
+                path: ../../google_places_sdk_plus_macos
+              google_places_sdk_plus_windows:
+                path: ../../google_places_sdk_plus_windows
+            YAML
+          fi
+
       - name: Check formatting
         run: dart format --set-exit-if-changed .
         working-directory: ${{ matrix.package }}
@@ -70,21 +131,22 @@ jobs:
         run: flutter pub get
         working-directory: ${{ matrix.package }}
 
-      - name: Build Runner
-        if: matrix.needs_build_runner == true
-        run: dart run build_runner build --delete-conflicting-outputs
-        working-directory: ${{ matrix.package }}
-
       - name: Analyze
         run: flutter analyze
         working-directory: ${{ matrix.package }}
 
       - name: Test with coverage
-        run: flutter test --coverage ${{ matrix.test_args }}
+        if: matrix.skip_coverage != true
+        run: flutter test --coverage
+        working-directory: ${{ matrix.package }}
+
+      - name: Test (no coverage)
+        if: matrix.skip_coverage == true
+        run: flutter test ${{ matrix.test_args }}
         working-directory: ${{ matrix.package }}
 
       - name: Upload coverage artifact
-        if: always()
+        if: always() && matrix.skip_coverage != true
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.package }}
@@ -92,9 +154,9 @@ jobs:
           if-no-files-found: ignore
 
       # Coverage threshold tracked but non-blocking while test coverage
-      # is being built up across the monorepo. Tighten after reaching 80%.
+      # is being built up across the monorepo.
       - name: Check coverage threshold (>= 80%)
-        if: always()
+        if: always() && matrix.skip_coverage != true
         continue-on-error: true
         uses: VeryGoodOpenSource/very_good_coverage@v3
         with:

@@ -90,6 +90,10 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
+      # Ensure flutter.jar is cached (needed by build.gradle compileOnly)
+      - name: Precache Flutter artifacts
+        run: flutter precache --android
+
       - name: Install Flutter dependencies
         run: flutter pub get
         working-directory: google_places_sdk_plus_android
