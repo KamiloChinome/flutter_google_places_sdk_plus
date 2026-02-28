@@ -77,50 +77,34 @@ jobs:
       # Monorepo: override deps to use local packages (fork API may differ from pub.dev)
       - name: Setup local dependency overrides
         run: |
-          cat > ${{ matrix.package }}/pubspec_overrides.yaml << 'YAML'
-          dependency_overrides:
-            google_places_sdk_plus:
-              path: ../google_places_sdk_plus
-            google_places_sdk_plus_platform_interface:
-              path: ../google_places_sdk_plus_platform_interface
-            google_places_sdk_plus_android:
-              path: ../google_places_sdk_plus_android
-            google_places_sdk_plus_ios:
-              path: ../google_places_sdk_plus_ios
-            google_places_sdk_plus_web:
-              path: ../google_places_sdk_plus_web
-            google_places_sdk_plus_http:
-              path: ../google_places_sdk_plus_http
-            google_places_sdk_plus_linux:
-              path: ../google_places_sdk_plus_linux
-            google_places_sdk_plus_macos:
-              path: ../google_places_sdk_plus_macos
-            google_places_sdk_plus_windows:
-              path: ../google_places_sdk_plus_windows
-          YAML
-          # Also for example app if it exists (paths are relative to example/)
+          write_overrides() {
+            local prefix="$1"
+            local target="$2"
+            {
+              echo "dependency_overrides:"
+              echo "  google_places_sdk_plus:"
+              echo "    path: ${prefix}google_places_sdk_plus"
+              echo "  google_places_sdk_plus_platform_interface:"
+              echo "    path: ${prefix}google_places_sdk_plus_platform_interface"
+              echo "  google_places_sdk_plus_android:"
+              echo "    path: ${prefix}google_places_sdk_plus_android"
+              echo "  google_places_sdk_plus_ios:"
+              echo "    path: ${prefix}google_places_sdk_plus_ios"
+              echo "  google_places_sdk_plus_web:"
+              echo "    path: ${prefix}google_places_sdk_plus_web"
+              echo "  google_places_sdk_plus_http:"
+              echo "    path: ${prefix}google_places_sdk_plus_http"
+              echo "  google_places_sdk_plus_linux:"
+              echo "    path: ${prefix}google_places_sdk_plus_linux"
+              echo "  google_places_sdk_plus_macos:"
+              echo "    path: ${prefix}google_places_sdk_plus_macos"
+              echo "  google_places_sdk_plus_windows:"
+              echo "    path: ${prefix}google_places_sdk_plus_windows"
+            } > "$target"
+          }
+          write_overrides "../" "${{ matrix.package }}/pubspec_overrides.yaml"
           if [ -d "${{ matrix.package }}/example" ]; then
-            cat > ${{ matrix.package }}/example/pubspec_overrides.yaml << 'YAML'
-            dependency_overrides:
-              google_places_sdk_plus:
-                path: ../../google_places_sdk_plus
-              google_places_sdk_plus_platform_interface:
-                path: ../../google_places_sdk_plus_platform_interface
-              google_places_sdk_plus_android:
-                path: ../../google_places_sdk_plus_android
-              google_places_sdk_plus_ios:
-                path: ../../google_places_sdk_plus_ios
-              google_places_sdk_plus_web:
-                path: ../../google_places_sdk_plus_web
-              google_places_sdk_plus_http:
-                path: ../../google_places_sdk_plus_http
-              google_places_sdk_plus_linux:
-                path: ../../google_places_sdk_plus_linux
-              google_places_sdk_plus_macos:
-                path: ../../google_places_sdk_plus_macos
-              google_places_sdk_plus_windows:
-                path: ../../google_places_sdk_plus_windows
-            YAML
+            write_overrides "../../" "${{ matrix.package }}/example/pubspec_overrides.yaml"
           fi
 
       - name: Check formatting

@@ -57,13 +57,14 @@ android {
 
 dependencies {
     // Flutter engine — provided by Flutter build system at runtime.
-    // Added as compileOnly so standalone Gradle (CI Kotlin tests) can resolve
+    // Added here so standalone Gradle (CI Kotlin tests) can resolve
     // io.flutter.* imports without requiring the full Flutter build pipeline.
     def flutterRoot = System.env.FLUTTER_ROOT
     if (flutterRoot) {
         def flutterJar = file("$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar")
         if (flutterJar.exists()) {
             compileOnly files(flutterJar)
+            testImplementation files(flutterJar)
         }
     }
 
