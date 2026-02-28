@@ -1,3 +1,11 @@
+## 0.5.5
+
+* Fix cross-platform inconsistencies between Android and iOS native plugins:
+  * PriceLevel serialization now returns identical string values on both platforms
+  * Error codes are now consistent across platforms (`API_ERROR_AUTOCOMPLETE`, `API_ERROR_PLACE`, etc.)
+  * Removed all debug `print()` statements from native plugins
+  * Replaced unsafe force unwraps with proper error handling that returns `FlutterError`
+
 ## 0.5.4
 
 * Fix: expose `newSessionToken` parameter in `fetchPlace()` — it was already defined in the platform interface but missing from the public API, preventing users from explicitly controlling session lifecycle.

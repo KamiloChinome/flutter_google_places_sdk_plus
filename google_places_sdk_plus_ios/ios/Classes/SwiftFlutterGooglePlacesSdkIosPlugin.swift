@@ -32,7 +32,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
         switch call.method {
         case METHOD_INITIALIZE:
             let args = call.arguments as? Dictionary<String,Any>
-            let apiKey = args?["apiKey"] as! String?
+            let apiKey = args?["apiKey"] as? String
             initialize(apiKey: apiKey)
             result(nil)
         case METHOD_UPDATE_SETTINGS:
@@ -47,8 +47,11 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
         case METHOD_IS_INITIALIZE:
             result(placesClient != nil)
         case METHOD_FIND_AUTOCOMPLETE_PREDICTIONS:
-            let args = call.arguments as! Dictionary<String,Any>
-            let query = args["query"] as! String
+            guard let args = call.arguments as? Dictionary<String,Any>,
+                  let query = args["query"] as? String else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required arguments for findAutocompletePredictions", details: nil))
+                return
+            }
             let countries = args["countries"] as? [String]? ?? [String]()
             let placeTypeFilters = args["typesFilter"] as? [String]
             let origin = latLngFromMap(argument: args["origin"] as? Dictionary<String, Any?>)
@@ -56,7 +59,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
             let locationBias = rectangularBoundsFromMap(argument: args["locationBias"] as? Dictionary<String, Any?>)
             let locationRestriction = rectangularBoundsFromMap(argument: args["locationRestriction"] as? Dictionary<String, Any?>)
             let sessionToken = getSessionToken(force: newSessionToken == true)
-            
+
             let filter = GMSAutocompleteFilter()
             filter.types = placeTypeFilters;
             filter.countries = countries
@@ -70,9 +73,8 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
 
             placesClient.fetchAutocompleteSuggestions(from: request, callback: { (suggestions, error) in
                     if let error = error {
-                        print("fetchAutocompleteSuggestions error: \(error)")
                         result(FlutterError(
-                            code: "API_ERROR",
+                            code: "API_ERROR_AUTOCOMPLETE",
                             message: error.localizedDescription,
                             details: nil
                         ))
@@ -83,8 +85,11 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
                     }
                 })
         case METHOD_FETCH_PLACE:
-            let args = call.arguments as! Dictionary<String,Any>
-            let placeId = args["placeId"] as! String
+            guard let args = call.arguments as? Dictionary<String,Any>,
+                  let placeId = args["placeId"] as? String else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required arguments for fetchPlace", details: nil))
+                return
+            }
             let fields = ((args["fields"] as? [String])?.map {
                 (item) in return placeFieldFromStr(it: item)
             })?.reduce(GMSPlaceField(), { partialResult, field in
@@ -92,19 +97,18 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
             }) ?? GMSPlaceField.all
             let newSessionToken = args["newSessionToken"] as? Bool ?? false
             let sessionToken = getSessionToken(force: newSessionToken == true)
-            
+
             let properties = placeFieldToProperties(fields: fields)
             let request = GMSFetchPlaceRequest(placeID: placeId, placeProperties: properties, sessionToken: sessionToken)
-            
+
             placesClient.fetchPlace(with: request) { (place, error) in
                 // End session after fetchPlace (billing optimization).
                 // The next autocomplete call will create a new session token.
                 self.lastSessionToken = nil
 
                 if let error = error {
-                    print("fetchPlace error: \(error)")
                     result(FlutterError(
-                        code: "API_ERROR",
+                        code: "API_ERROR_PLACE",
                         message: error.localizedDescription,
                         details: nil
                     ))
@@ -114,20 +118,22 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
                 }
             }
         case METHOD_FETCH_PLACE_PHOTO:
-            let args = call.arguments as! Dictionary<String,Any>
-            let photoRef = args["photoReference"] as! String
+            guard let args = call.arguments as? Dictionary<String,Any>,
+                  let photoRef = args["photoReference"] as? String else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required arguments for fetchPlacePhoto", details: nil))
+                return
+            }
             let maxWidth = args["maxWidth"] as? Int
             let maxHeight = args["maxHeight"] as? Int
             let maxSize = CGSize(
                 width: maxWidth ?? 4800,
                 height: maxHeight ?? 4800
             )
-            
+
             if let photoMetadata = photosCache[photoRef] {
                 let request = GMSFetchPhotoRequest(photoMetadata: photoMetadata, maxSize: maxSize)
                 placesClient.fetchPhoto(with: request, callback: { (photo, error) -> Void in
                     if let error = error {
-                        print("fetchPlacePhoto error: \(error)")
                         result(FlutterError(
                             code: "API_ERROR_PHOTO",
                             message: error.localizedDescription,
@@ -146,8 +152,11 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
                 ))
             }
         case METHOD_SEARCH_BY_TEXT:
-            let args = call.arguments as! Dictionary<String,Any>
-            let textQuery = args["textQuery"] as! String
+            guard let args = call.arguments as? Dictionary<String,Any>,
+                  let textQuery = args["textQuery"] as? String else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required arguments for searchByText", details: nil))
+                return
+            }
             let includedType = args["includedType"] as? String
             let maxResultCount = args["maxResultCount"] as? Int
             let minRating = args["minRating"] as? Double
@@ -163,7 +172,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
             })?.reduce(GMSPlaceField(), { partialResult, field in
                 return GMSPlaceField(rawValue: partialResult.rawValue | field.rawValue)
             }) ?? GMSPlaceField.all
-            
+
             let properties = placeFieldToProperties(fields: fields)
             let request = GMSPlaceSearchByTextRequest(textQuery: textQuery, placeProperties: properties)
             request.includedType = includedType
@@ -195,10 +204,9 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
                     request.rankPreference = GMSPlaceSearchByTextRankPreference.relevance
                 }
             }
-            
+
             placesClient.searchByText(with: request) { (places, error) in
                 if let error = error {
-                    print("searchByText error: \(error)")
                     result(FlutterError(
                         code: "API_ERROR_SEARCH_BY_TEXT",
                         message: error.localizedDescription,
@@ -210,7 +218,10 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
                 }
             }
         case METHOD_NEARBY_SEARCH:
-            let args = call.arguments as! Dictionary<String,Any>
+            guard let args = call.arguments as? Dictionary<String,Any> else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required arguments for searchNearby", details: nil))
+                return
+            }
             let fields = ((args["fields"] as? [String])?.map {
                 (item) in return placeFieldFromStr(it: item)
             })?.reduce(GMSPlaceField(), { partialResult, field in
@@ -258,7 +269,6 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
             
             placesClient.searchNearby(with: request) { (places, error) in
                 if let error = error {
-                    print("searchNearby error: \(error)")
                     result(FlutterError(
                         code: "API_ERROR_NEARBY_SEARCH",
                         message: error.localizedDescription,
@@ -294,7 +304,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
             "phoneNumber": place.phoneNumber,
             "photoMetadatas": place.photos?.map { photoMetadataToMap(photoMetadata: $0) },
             "plusCode": plusCodeToMap(plusCode: place.plusCode),
-            "priceLevel": place.priceLevel.rawValue,
+            "priceLevel": priceLevelToString(priceLevel: place.priceLevel),
             "rating": place.rating,
             "types": place.types?.map { $0.uppercased() },
             "userRatingsTotal": place.userRatingsTotal,
@@ -430,8 +440,27 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
         ]
     }
     
+    // MARK: - PriceLevel
+
+    private func priceLevelToString(priceLevel: GMSPlacesPriceLevel) -> String? {
+        switch priceLevel {
+        case .free:
+            return "PRICE_LEVEL_FREE"
+        case .cheap:
+            return "PRICE_LEVEL_INEXPENSIVE"
+        case .medium:
+            return "PRICE_LEVEL_MODERATE"
+        case .high:
+            return "PRICE_LEVEL_EXPENSIVE"
+        case .expensive:
+            return "PRICE_LEVEL_VERY_EXPENSIVE"
+        default:
+            return nil
+        }
+    }
+
     // MARK: - Business status
-    
+
     private func businessStatusToStr(it: GMSPlacesBusinessStatus) -> String? {
         switch (it) {
         case GMSPlacesBusinessStatus.operational:
@@ -655,8 +684,6 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
             return GMSPlaceField()
             
         default:
-            // Unknown field — return empty field instead of crashing
-            print("Warning: Unknown placeField '\(it)', ignoring.")
             return GMSPlaceField()
         }
     }
@@ -752,7 +779,7 @@ public class SwiftFlutterGooglePlacesSdkIosPlugin: NSObject, FlutterPlugin {
 
     // MARK: - Session tokens
     
-    private func getSessionToken(force: Bool) -> GMSAutocompleteSessionToken! {
+    private func getSessionToken(force: Bool) -> GMSAutocompleteSessionToken? {
         let localToken = lastSessionToken
         if (force || localToken == nil) {
             return GMSAutocompleteSessionToken.init()

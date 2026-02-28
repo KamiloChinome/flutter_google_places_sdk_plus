@@ -22,8 +22,9 @@ enum PriceLevel {
 
   factory PriceLevel.fromJson(dynamic value) {
     if (value is int) {
-      // iOS SDK sends priceLevel as an int (raw enum value)
-      // 0 = unspecified, 1 = free, 2 = inexpensive, 3 = moderate, 4 = expensive, 5 = very expensive
+      // Legacy: older iOS plugin versions (< 0.3.3) sent priceLevel as an int.
+      // Both platforms now send string values (e.g. "PRICE_LEVEL_MODERATE").
+      // Keeping int support for backward compatibility.
       if (value >= 0 && value < PriceLevel.values.length) {
         return PriceLevel.values[value];
       }

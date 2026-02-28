@@ -1,3 +1,9 @@
+## 0.4.2
+
+* Remove all `print()` debug statements from native plugin
+* Replace force unwraps (`!!`) with safe null checks that return `FlutterError` instead of crashing
+* Add `requireClient()` guard — returns `CLIENT_NOT_INITIALIZED` error if called before `initialize()`
+
 ## 0.4.1
 
 * Fix: session token was not cleared after `fetchPlace()`, causing subsequent autocomplete searches to reuse a stale token and break session billing boundaries. The token is now invalidated after every `fetchPlace()` call.
