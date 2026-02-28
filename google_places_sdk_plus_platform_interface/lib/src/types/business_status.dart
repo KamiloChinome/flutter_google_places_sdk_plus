@@ -9,8 +9,7 @@ part 'business_status.g.dart';
 enum BusinessStatus {
   Operational,
   ClosedTemporarily,
-  ClosedPermanently
-  ;
+  ClosedPermanently;
 
   factory BusinessStatus.fromJson(String name) {
     name = name.toLowerCase();

@@ -1,7 +1,7 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:google_places_sdk_plus_http/google_places_sdk_plus_http.dart';
 import 'package:google_places_sdk_plus_linux/google_places_sdk_plus_linux.dart';
 import 'package:google_places_sdk_plus_platform_interface/google_places_sdk_plus_platform_interface.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FlutterGooglePlacesSdkLinuxPlugin', () {

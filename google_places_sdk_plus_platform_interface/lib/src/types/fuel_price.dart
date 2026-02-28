@@ -1,6 +1,6 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/fuel_type.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/money.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'fuel_price.freezed.dart';
 part 'fuel_price.g.dart';

@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'place_autocomplete_matched_substring.dart';
@@ -18,7 +20,7 @@ sealed class PlaceAutocompleteStructuredFormat
     /// These describe the location of the entered term in the prediction result text,
     /// so that the term can be highlighted if desired.
     required List<PlaceAutocompleteMatchedSubstring>
-        main_text_matched_substrings,
+    main_text_matched_substrings,
 
     /// Contains the secondary text of a prediction, usually the location of the place.
     required String secondary_text,
@@ -31,6 +33,6 @@ sealed class PlaceAutocompleteStructuredFormat
 
   /// Parse a [PlaceAutocompleteStructuredFormat] from json data.
   factory PlaceAutocompleteStructuredFormat.fromJson(
-          Map<String, Object?> json) =>
-      _$PlaceAutocompleteStructuredFormatFromJson(json);
+    Map<String, Object?> json,
+  ) => _$PlaceAutocompleteStructuredFormatFromJson(json);
 }

@@ -1,59 +1,146 @@
-name: FlutterTests
+name: Tests
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [ 'google_places_sdk_plus/**' ]
+    paths:
+      - 'google_places_sdk_plus/**'
+      - 'google_places_sdk_plus_platform_interface/**'
+      - 'google_places_sdk_plus_http/**'
+      - 'google_places_sdk_plus_linux/**'
+      - 'google_places_sdk_plus_macos/**'
+      - 'google_places_sdk_plus_windows/**'
+      - 'google_places_sdk_plus_web/**'
+      - 'analysis_options.yaml'
   pull_request:
     branches: [main]
-    paths: [ 'google_places_sdk_plus/**' ]
+    paths:
+      - 'google_places_sdk_plus/**'
+      - 'google_places_sdk_plus_platform_interface/**'
+      - 'google_places_sdk_plus_http/**'
+      - 'google_places_sdk_plus_linux/**'
+      - 'google_places_sdk_plus_macos/**'
+      - 'google_places_sdk_plus_windows/**'
+      - 'google_places_sdk_plus_web/**'
+      - 'analysis_options.yaml'
 
 env:
-  flutter_version: "3.24.0"
-  java_version: "16.x"
-  dir: "google_places_sdk_plus"
+  FLUTTER_VERSION: '3.38.5'
 
 jobs:
-  setup:
-    name: Run tests on [${{ matrix.os }}]
-    runs-on: ${{ matrix.os }}
-
+  test:
+    name: "${{ matrix.package }}"
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest] #, windows-latest, macos-latest]
+        package:
+          - google_places_sdk_plus
+          - google_places_sdk_plus_platform_interface
+          - google_places_sdk_plus_http
+          - google_places_sdk_plus_linux
+          - google_places_sdk_plus_macos
+          - google_places_sdk_plus_windows
+          - google_places_sdk_plus_web
         include:
-          - os: ubuntu-latest
-            flutter_path: /opt/hostedtoolcache/flutter
-#          - os: macos-latest
-#            flutter_path: /Users/runner/hostedtoolcache/flutter
-#          - os: windows-latest
-#            flutter_path: C:\hostedtoolcache\flutter
+          - package: google_places_sdk_plus_web
+            test_args: '--platform chrome'
+            skip_coverage: true
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v1
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          path: ${{ matrix.flutter_path }}
-          key: ${{ runner.os }}-flutter-${{ env.flutter_version }}
-      - uses: actions/setup-java@v1
-        with:
-          java-version: ${{ env.java_version }}
-      - uses: subosito/flutter-action@v1
-        with:
-          flutter-version: ${{ env.flutter_version }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
       - name: Flutter version
         run: flutter --version
+
+      # Monorepo: generate freezed/json_serializable code for packages that need it
+      - name: Generate code (platform_interface)
+        run: |
+          cd google_places_sdk_plus_platform_interface
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Generate code (http)
+        run: |
+          cd google_places_sdk_plus_http
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      # Monorepo: override deps to use local packages (fork API may differ from pub.dev)
+      - name: Setup local dependency overrides
+        run: |
+          PACKAGES=(
+            google_places_sdk_plus
+            google_places_sdk_plus_platform_interface
+            google_places_sdk_plus_android
+            google_places_sdk_plus_ios
+            google_places_sdk_plus_web
+            google_places_sdk_plus_http
+            google_places_sdk_plus_linux
+            google_places_sdk_plus_macos
+            google_places_sdk_plus_windows
+          )
+          write_overrides() {
+            local prefix="$1"
+            local target="$2"
+            local skip="$3"
+            echo "dependency_overrides:" > "$target"
+            for pkg in "${PACKAGES[@]}"; do
+              if [ "$pkg" != "$skip" ]; then
+                echo "  $pkg:" >> "$target"
+                echo "    path: ${prefix}$pkg" >> "$target"
+              fi
+            done
+          }
+          write_overrides "../" "${{ matrix.package }}/pubspec_overrides.yaml" "${{ matrix.package }}"
+          if [ -d "${{ matrix.package }}/example" ]; then
+            write_overrides "../../" "${{ matrix.package }}/example/pubspec_overrides.yaml" ""
+          fi
+
+      - name: Check formatting
+        run: dart format --set-exit-if-changed .
+        working-directory: ${{ matrix.package }}
+
       - name: Install dependencies
         run: flutter pub get
-        working-directory: ${{ env.dir }}
-      - name: Flutter Analyze
-        run: flutter analyze
-        working-directory: ${{ env.dir }}
-      - name: Test
-        run: flutter test
-        working-directory: ${{ env.dir }}
+        working-directory: ${{ matrix.package }}
 
+      - name: Analyze
+        run: flutter analyze
+        working-directory: ${{ matrix.package }}
+
+      - name: Test with coverage
+        if: matrix.skip_coverage != true
+        run: flutter test --coverage
+        working-directory: ${{ matrix.package }}
+
+      - name: Test (no coverage)
+        if: matrix.skip_coverage == true
+        run: flutter test ${{ matrix.test_args }}
+        working-directory: ${{ matrix.package }}
+
+      - name: Upload coverage artifact
+        if: always() && matrix.skip_coverage != true
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.package }}
+          path: ${{ matrix.package }}/coverage/lcov.info
+          if-no-files-found: ignore
+
+      # Coverage threshold tracked but non-blocking while test coverage
+      # is being built up across the monorepo.
+      - name: Check coverage threshold (>= 80%)
+        if: always() && matrix.skip_coverage != true
+        continue-on-error: true
+        uses: VeryGoodOpenSource/very_good_coverage@v3
+        with:
+          path: ${{ matrix.package }}/coverage/lcov.info
+          min_coverage: 80

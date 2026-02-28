@@ -1,5 +1,5 @@
-import 'package:google_places_sdk_plus_platform_interface/src/types/time_of_week.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:google_places_sdk_plus_platform_interface/src/types/time_of_week.dart';
 
 part 'period.freezed.dart';
 part 'period.g.dart';

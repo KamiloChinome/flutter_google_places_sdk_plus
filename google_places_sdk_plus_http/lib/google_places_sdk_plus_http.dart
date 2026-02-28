@@ -21,8 +21,8 @@ class FlutterGooglePlacesSdkHttpPlugin
     : _httpClient = httpClient ?? http.Client();
 
   static const _kApiHostV2 = 'https://places.googleapis.com';
-  static const _kApiPlacesV2 = '${_kApiHostV2}/v1/places:autocomplete';
-  static const _kApiPlaceDetailsV2 = '${_kApiHostV2}/v1/places';
+  static const _kApiPlacesV2 = '$_kApiHostV2/v1/places:autocomplete';
+  static const _kApiPlaceDetailsV2 = '$_kApiHostV2/v1/places';
 
   final http.Client _httpClient;
 
@@ -265,7 +265,7 @@ class FlutterGooglePlacesSdkHttpPlugin
       strictTypeFiltering: strictTypeFiltering,
     );
 
-    final url = '$_kApiHostV2/v1/places:searchText';
+    const url = '$_kApiHostV2/v1/places:searchText';
     final json = await _doPost(
       url,
       jsonEncode(body),
@@ -379,7 +379,7 @@ class FlutterGooglePlacesSdkHttpPlugin
       maxResultCount: maxResultCount,
     );
 
-    final url = '$_kApiHostV2/v1/places:searchNearby';
+    const url = '$_kApiHostV2/v1/places:searchNearby';
     final json = await _doPost(
       url,
       jsonEncode(body),
@@ -463,7 +463,7 @@ class FlutterGooglePlacesSdkHttpPlugin
         response.statusCode >= 300 ||
         strBody == null) {
       final err =
-          "Bad result on GET $url. Status code (${response.statusCode}), body: $strBody, bodyFetchErr (if any): $strBodyErr";
+          'Bad result on GET $url. Status code (${response.statusCode}), body: $strBody, bodyFetchErr (if any): $strBodyErr';
       throw err;
     }
 
@@ -493,7 +493,7 @@ class FlutterGooglePlacesSdkHttpPlugin
         response.statusCode >= 300 ||
         strBody == null) {
       final err =
-          "Bad result on call to $url. Status code (${response.statusCode}), body: $strBody, bodyFetchErr (if any): $strBodyErr";
+          'Bad result on call to $url. Status code (${response.statusCode}), body: $strBody, bodyFetchErr (if any): $strBodyErr';
       throw err;
     }
 

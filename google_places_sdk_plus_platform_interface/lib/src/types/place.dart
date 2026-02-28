@@ -1,3 +1,4 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/accessibility_options.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/address_component.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/address_descriptor.dart';
@@ -26,7 +27,6 @@ import 'package:google_places_sdk_plus_platform_interface/src/types/price_range.
 import 'package:google_places_sdk_plus_platform_interface/src/types/review.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/review_summary.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/sub_destination.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'place.freezed.dart';
 part 'place.g.dart';

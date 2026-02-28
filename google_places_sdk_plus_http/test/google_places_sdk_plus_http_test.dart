@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:google_places_sdk_plus_http/google_places_sdk_plus_http.dart';
 import 'package:google_places_sdk_plus_platform_interface/google_places_sdk_plus_platform_interface.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
@@ -18,7 +18,7 @@ void main() {
     String body, {
     int statusCode = 200,
     void Function(http.Request)? onRequest,
-  }) {  
+  }) {
     return MockClient((request) async {
       onRequest?.call(request);
       return http.Response(body, statusCode);

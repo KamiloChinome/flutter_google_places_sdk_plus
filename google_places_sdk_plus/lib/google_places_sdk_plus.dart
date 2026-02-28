@@ -8,8 +8,7 @@ export 'package:google_places_sdk_plus_platform_interface/google_places_sdk_plus
 /// Client used to call methods on the native google places sdk
 class FlutterGooglePlacesSdk {
   /// Construct a FlutterGooglePlacesSdk using the specific api key and locale
-  FlutterGooglePlacesSdk(this._apiKey, {Locale? locale})
-    : this._locale = locale;
+  FlutterGooglePlacesSdk(this._apiKey, {Locale? locale}) : _locale = locale;
 
   /// "Powered by google" image that should be used when background is white
   static const AssetImage assetPoweredByGoogleOnWhite =
@@ -52,11 +51,9 @@ class FlutterGooglePlacesSdk {
 
   static Future<void> _waitFor(Future<void> future) {
     final Completer<void> completer = Completer<void>();
-    future.whenComplete(completer.complete).catchError((dynamic err) {
-      // Error is already delivered to the caller via the original future.
-      // Swallow here to prevent an unhandled async error.
-      log('FlutterGooglePlacesSdk::call error: $err');
-    });
+    // ignore() prevents an unhandled async error on the chained future.
+    // The error is already delivered to the caller via the original future.
+    future.whenComplete(completer.complete).ignore();
     return completer.future;
   }
 
@@ -123,11 +120,13 @@ class FlutterGooglePlacesSdk {
     required List<PlaceField> fields,
     bool? newSessionToken,
   }) {
-    return _addMethodCall(() => platform.fetchPlace(
-          placeId,
-          fields: fields,
-          newSessionToken: newSessionToken,
-        ));
+    return _addMethodCall(
+      () => platform.fetchPlace(
+        placeId,
+        fields: fields,
+        newSessionToken: newSessionToken,
+      ),
+    );
   }
 
   /// Fetches a photo of a place.

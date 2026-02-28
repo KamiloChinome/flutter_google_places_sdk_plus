@@ -1,5 +1,5 @@
-import 'package:google_places_sdk_plus_platform_interface/src/types/ev_connector_type.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:google_places_sdk_plus_platform_interface/src/types/ev_connector_type.dart';
 
 part 'connector_aggregation.freezed.dart';
 part 'connector_aggregation.g.dart';

@@ -3,9 +3,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'
     show MethodCall, MethodChannel, PlatformException;
+import 'package:flutter_test/flutter_test.dart';
 import 'package:google_places_sdk_plus/google_places_sdk_plus.dart';
 import 'package:google_places_sdk_plus_platform_interface/method_channel_google_places_sdk_plus.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -136,7 +136,7 @@ void main() {
         const queryTest = 'my-query-text';
         const countriesTest = ['c5', 'c32'];
         const placeTypeFilterTest = ['establishment'];
-        final origin = LatLng(lat: 32.51, lng: 95.31);
+        const origin = LatLng(lat: 32.51, lng: 95.31);
         final result = await flutterGooglePlacesSdk.findAutocompletePredictions(
           queryTest,
           countries: countriesTest,
@@ -152,7 +152,7 @@ void main() {
             arguments: <String, dynamic>{
               'query': queryTest,
               'countries': countriesTest,
-              "typesFilter": ['establishment'],
+              'typesFilter': ['establishment'],
               'newSessionToken': false,
               'origin': origin.toJson(),
               'locationBias': null,
@@ -161,7 +161,7 @@ void main() {
           ),
         ]);
 
-        final expected = FindAutocompletePredictionsResponse([
+        const expected = FindAutocompletePredictionsResponse([
           kPrediction1,
           kPrediction2,
         ]);
@@ -169,7 +169,7 @@ void main() {
       });
 
       test('with locationBias', () async {
-        final locationBias = LatLngBounds(
+        const locationBias = LatLngBounds(
           southwest: LatLng(lat: 32.0, lng: 34.0),
           northeast: LatLng(lat: 33.0, lng: 35.0),
         );
@@ -207,7 +207,7 @@ void main() {
           ),
         ]);
 
-        final expected = FetchPlaceResponse(kPlace);
+        const expected = FetchPlaceResponse(kPlace);
         expect(result, equals(expected));
       });
     });
@@ -283,7 +283,7 @@ void main() {
       test('sends all optional parameters', () async {
         const textQuery = 'cafe';
         const fields = [PlaceField.Id];
-        final locationBias = LatLngBounds(
+        const locationBias = LatLngBounds(
           southwest: LatLng(lat: 32.0, lng: 34.0),
           northeast: LatLng(lat: 33.0, lng: 35.0),
         );
@@ -331,7 +331,7 @@ void main() {
     group('searchNearby', () {
       test('sends correct request and parses response', () async {
         const fields = [PlaceField.Id, PlaceField.Location];
-        final locationRestriction = CircularBounds(
+        const locationRestriction = CircularBounds(
           center: LatLng(lat: 32.0853, lng: 34.7818),
           radius: 1000.0,
         );
@@ -360,7 +360,7 @@ void main() {
       });
 
       test('sends all optional parameters', () async {
-        final locationRestriction = CircularBounds(
+        const locationRestriction = CircularBounds(
           center: LatLng(lat: 32.0853, lng: 34.7818),
           radius: 500.0,
         );

@@ -1,59 +1,102 @@
-name: FlutterTests-ios
+name: Tests (iOS)
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['google_places_sdk_plus_ios/**']
+    paths:
+      - 'google_places_sdk_plus_ios/**'
+      - 'google_places_sdk_plus/example/ios/RunnerTests/**'
+      - 'analysis_options.yaml'
   pull_request:
     branches: [main]
-    paths: ['google_places_sdk_plus_ios/**']
+    paths:
+      - 'google_places_sdk_plus_ios/**'
+      - 'google_places_sdk_plus/example/ios/RunnerTests/**'
+      - 'analysis_options.yaml'
 
 env:
-  flutter_version: "3.29.0"
-  java_version: "19.x"
-  dir: "google_places_sdk_plus_ios"
+  FLUTTER_VERSION: '3.38.5'
 
 jobs:
-  setup_pi:
-    name: Run tests on [${{ matrix.os }}]
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest] #, windows-latest, macos-latest]
-        include:
-          - os: ubuntu-latest
-            flutter_path: /opt/hostedtoolcache/flutter
-#          - os: macos-latest
-#            flutter_path: /Users/runner/hostedtoolcache/flutter
-#          - os: windows-latest
-#            flutter_path: C:\hostedtoolcache\flutter
+  dart-tests:
+    name: Dart tests
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v1
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          path: ${{ matrix.flutter_path }}
-          key: ${{ runner.os }}-flutter-${{ env.flutter_version }}
-      - uses: actions/setup-java@v1
-        with:
-          java-version: ${{ env.java_version }}
-      - uses: subosito/flutter-action@v1
-        with:
-          flutter-version: ${{ env.flutter_version }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
       - name: Flutter version
         run: flutter --version
+
+      - name: Check formatting
+        run: dart format --set-exit-if-changed .
+        working-directory: google_places_sdk_plus_ios
+
       - name: Install dependencies
         run: flutter pub get
-        working-directory: ${{ env.dir }}
-      - name: Flutter Analyze
-        run: flutter analyze
-        working-directory: ${{ env.dir }}
-      - name: Test
-        run: flutter test
-        working-directory: ${{ env.dir }}
+        working-directory: google_places_sdk_plus_ios
 
+      - name: Analyze
+        run: flutter analyze
+        working-directory: google_places_sdk_plus_ios
+
+      - name: Test with coverage
+        run: flutter test --coverage
+        working-directory: google_places_sdk_plus_ios
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-google_places_sdk_plus_ios
+          path: google_places_sdk_plus_ios/coverage/lcov.info
+          if-no-files-found: ignore
+
+      - name: Check coverage threshold (>= 80%)
+        if: always()
+        continue-on-error: true
+        uses: VeryGoodOpenSource/very_good_coverage@v3
+        with:
+          path: google_places_sdk_plus_ios/coverage/lcov.info
+          min_coverage: 80
+
+  swift-tests:
+    name: Swift unit tests
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+        working-directory: google_places_sdk_plus
+
+      - name: Install CocoaPods dependencies
+        run: pod install
+        working-directory: google_places_sdk_plus/example/ios
+
+      - name: Run Swift unit tests
+        run: |
+          xcodebuild test \
+            -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -only-testing:RunnerTests \
+            -resultBundlePath TestResults \
+            | xcpretty
+        working-directory: google_places_sdk_plus/example/ios

@@ -348,7 +348,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun latLngBoundsFromMap(argument: Map<String, Any?>?): LatLngBounds? {
+    internal fun latLngBoundsFromMap(argument: Map<String, Any?>?): LatLngBounds? {
         if (argument == null) {
             return null
         }
@@ -375,7 +375,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         return localToken
     }
 
-    private fun latLngFromMap(argument: Map<String, Any?>?): LatLng? {
+    internal fun latLngFromMap(argument: Map<String, Any?>?): LatLng? {
         if (argument == null) {
             return null
         }
@@ -389,7 +389,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         return LatLng(lat, lng)
     }
 
-    private fun placeFieldFromStr(it: String): Place.Field? {
+    internal fun placeFieldFromStr(it: String): Place.Field? {
         try {
             return when (it) {
                 // Explicit mappings for fields where Dart name != Android SDK enum name
@@ -403,13 +403,13 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                 "EvChargeAmenitySummary" -> Place.Field.EV_CHARGE_AMENITY_SUMMARY
                 else -> Place.Field.valueOf(it.toScreamingSnakeCase())
             }
-        } catch (_: IllegalArgumentException) {
+        } catch (_: Exception) {
             Log.w(TAG, "Unsupported placeField on Android, ignoring: $it")
             return null
         }
     }
 
-    private fun String.toScreamingSnakeCase(): String {
+    internal fun String.toScreamingSnakeCase(): String {
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, this)
     }
 
@@ -600,7 +600,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
 
     // ===== Helper to convert BooleanPlaceAttributeValue to Boolean? =====
 
-    private fun booleanAttributeToValue(attr: Place.BooleanPlaceAttributeValue?): Boolean? {
+    internal fun booleanAttributeToValue(attr: Place.BooleanPlaceAttributeValue?): Boolean? {
         return when (attr) {
             Place.BooleanPlaceAttributeValue.TRUE -> true
             Place.BooleanPlaceAttributeValue.FALSE -> false
@@ -610,7 +610,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
 
     // ===== New serializer helpers =====
 
-    private fun localizedTextToMap(text: String?, languageCode: String?): Map<String, Any?>? {
+    internal fun localizedTextToMap(text: String?, languageCode: String?): Map<String, Any?>? {
         if (text == null) return null
         return mapOf(
             "text" to text,
@@ -618,7 +618,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         )
     }
 
-    private fun priceLevelToString(priceLevel: Int): String? {
+    internal fun priceLevelToString(priceLevel: Int): String? {
         return when (priceLevel) {
             0 -> "PRICE_LEVEL_FREE"
             1 -> "PRICE_LEVEL_INEXPENSIVE"
@@ -817,7 +817,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         )
     }
 
-    private fun plusCodeToMap(plusCode: PlusCode?): Map<String, Any?>? {
+    internal fun plusCodeToMap(plusCode: PlusCode?): Map<String, Any?>? {
         if (plusCode == null) {
             return null
         }
@@ -828,7 +828,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         )
     }
 
-    private fun latLngBoundsToMap(viewport: LatLngBounds?): Map<String, Any?>? {
+    internal fun latLngBoundsToMap(viewport: LatLngBounds?): Map<String, Any?>? {
         if (viewport == null) {
             return null
         }
@@ -839,7 +839,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         )
     }
 
-    private fun addressComponentToMap(addressComponent: AddressComponent): Map<String, Any?> {
+    internal fun addressComponentToMap(addressComponent: AddressComponent): Map<String, Any?> {
         return mapOf(
             "name" to (addressComponent.name ?: ""),
             "shortName" to (addressComponent.shortName ?: ""),
@@ -847,7 +847,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         )
     }
 
-    private fun latLngToMap(latLng: LatLng?): Any? {
+    internal fun latLngToMap(latLng: LatLng?): Any? {
         if (latLng == null) {
             return null
         }
@@ -868,7 +868,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         )
     }
 
-    private fun readLocale(localeMap: Map<String, Any>?): Locale? {
+    internal fun readLocale(localeMap: Map<String, Any>?): Locale? {
         if (localeMap == null) {
             return null
         }

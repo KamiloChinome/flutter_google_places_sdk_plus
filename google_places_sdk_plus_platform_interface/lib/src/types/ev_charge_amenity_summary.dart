@@ -1,6 +1,6 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/content_block.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/localized_text.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'ev_charge_amenity_summary.freezed.dart';
 part 'ev_charge_amenity_summary.g.dart';

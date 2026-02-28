@@ -1,5 +1,5 @@
-import 'package:google_places_sdk_plus_platform_interface/src/types/period.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:google_places_sdk_plus_platform_interface/src/types/period.dart';
 
 part 'opening_hours.freezed.dart';
 part 'opening_hours.g.dart';

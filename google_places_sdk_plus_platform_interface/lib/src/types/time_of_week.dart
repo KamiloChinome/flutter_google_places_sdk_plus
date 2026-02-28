@@ -1,6 +1,6 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/day_of_week.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/place_local_time.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'time_of_week.freezed.dart';
 part 'time_of_week.g.dart';

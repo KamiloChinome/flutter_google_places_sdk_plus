@@ -18,6 +18,6 @@ sealed class PlaceAutocompleteMatchedSubstring
 
   /// Parse a [PlaceAutocompleteMatchedSubstring] from json data.
   factory PlaceAutocompleteMatchedSubstring.fromJson(
-          Map<String, Object?> json) =>
-      _$PlaceAutocompleteMatchedSubstringFromJson(json);
+    Map<String, Object?> json,
+  ) => _$PlaceAutocompleteMatchedSubstringFromJson(json);
 }

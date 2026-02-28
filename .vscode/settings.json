@@ -1,0 +1,9 @@
+{
+  // Dart default line length is 80 — the official recommendation.
+  // Do NOT change this value. It matches `dart format` defaults and CI enforcement.
+  "dart.lineLength": 80,
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "Dart-Code.dart-code"
+  }
+}

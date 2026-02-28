@@ -1,131 +1,188 @@
-name: FlutterIntegrationTests
+name: Integration Tests
 
 on:
   workflow_dispatch:
+    inputs:
+      run_real_api:
+        description: 'Run real API tests (requires PLACES_API_KEY secret)'
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - 'google_places_sdk_plus/**'
+      - 'google_places_sdk_plus_platform_interface/**'
+      - 'google_places_sdk_plus_android/**'
+      - 'google_places_sdk_plus_ios/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'google_places_sdk_plus/**'
+      - 'google_places_sdk_plus_platform_interface/**'
+      - 'google_places_sdk_plus_android/**'
+      - 'google_places_sdk_plus_ios/**'
 
 env:
-  flutter_version: "2.5.1"
-  java_version: "11.x"
-  dir: "google_places_sdk_plus"
-  ndk_version: "21.4.7075529"
+  FLUTTER_VERSION: '3.38.5'
+  JAVA_VERSION: '17'
 
 jobs:
-  setup:
-    name: Checkout and analyze
-    runs-on: macos-latest
+  mocked-integration:
+    name: Mocked integration tests
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v1
+        uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y ninja-build libgtk-3-dev xvfb
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter_version }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      # Monorepo: generate freezed/json_serializable code
+      - name: Generate code (platform_interface)
+        run: |
+          cd google_places_sdk_plus_platform_interface
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Generate code (http)
+        run: |
+          cd google_places_sdk_plus_http
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      # Monorepo: override deps to use local packages
+      - name: Setup local dependency overrides
+        run: |
+          write_overrides() {
+            local prefix="$1"
+            local target="$2"
+            {
+              echo "dependency_overrides:"
+              echo "  google_places_sdk_plus:"
+              echo "    path: ${prefix}google_places_sdk_plus"
+              echo "  google_places_sdk_plus_platform_interface:"
+              echo "    path: ${prefix}google_places_sdk_plus_platform_interface"
+              echo "  google_places_sdk_plus_android:"
+              echo "    path: ${prefix}google_places_sdk_plus_android"
+              echo "  google_places_sdk_plus_ios:"
+              echo "    path: ${prefix}google_places_sdk_plus_ios"
+              echo "  google_places_sdk_plus_web:"
+              echo "    path: ${prefix}google_places_sdk_plus_web"
+              echo "  google_places_sdk_plus_http:"
+              echo "    path: ${prefix}google_places_sdk_plus_http"
+              echo "  google_places_sdk_plus_linux:"
+              echo "    path: ${prefix}google_places_sdk_plus_linux"
+              echo "  google_places_sdk_plus_macos:"
+              echo "    path: ${prefix}google_places_sdk_plus_macos"
+              echo "  google_places_sdk_plus_windows:"
+              echo "    path: ${prefix}google_places_sdk_plus_windows"
+            } > "$target"
+          }
+          write_overrides "../" "google_places_sdk_plus/pubspec_overrides.yaml"
+          write_overrides "../../" "google_places_sdk_plus/example/pubspec_overrides.yaml"
+
       - name: Install dependencies
         run: flutter pub get
-        working-directory: ${{ env.dir }}/example
-      - name: Flutter Analyze
-        run: flutter analyze
-        working-directory: ${{ env.dir }}
+        working-directory: google_places_sdk_plus/example
 
-  tests_ios:
-    name: Run iOS tests on [${{ matrix.os }}] - [${{ matrix.device }}]
-    if: ${{ false }}
-    runs-on: ${{ matrix.os }}
-    needs: setup
+      - name: Run mocked integration tests
+        run: xvfb-run flutter test integration_test/mocked_places_test.dart -d linux
+        working-directory: google_places_sdk_plus/example
 
-    strategy:
-      fail-fast: false
-      matrix:
-        device:
-          - iPhone 8 (14.5)
-          # - iPhone 11 Pro Max (13.1)
-        os: [ macos-latest ]
-        include:
-          - os: macos-latest
-            flutter_path: /Users/runner/hostedtoolcache/flutter
+  real-api-android:
+    name: Real API tests (Android)
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_real_api == 'true'
+    runs-on: ubuntu-latest
 
     steps:
-      - name: List all simulators
-        if: ${{ matrix.os == 'macos-latest' }}
-        run: xcrun instruments -s
-      - name: Start Simulator
-        if: ${{ matrix.os == 'macos-latest' }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      # Monorepo: generate freezed/json_serializable code
+      - name: Generate code (platform_interface)
         run: |
-          UDID=$(
-            xcrun instruments -s |
-            awk \
-              -F ' *[][]' \
-              -v 'device=${{ matrix.device }}' \
-              '$1 == device { print $2 }'
-          )
-          xcrun simctl boot "${UDID:?No Simulator with this name found}"
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v1
-        with:
-          path: ${{ matrix.flutter_path }}
-          key: ${{ runner.os }}-flutter-${{ env.flutter_version }}
-      - uses: subosito/flutter-action@v1
-        with:
-          flutter-version: ${{ env.flutter_version }}
-      - name: Flutter version
-        run: flutter --version
-      - name: Build
-        run: flutter build ios --no-codesign
-        working-directory: ${{ env.dir }}/example
-      - name: Integration Test
-        run: flutter drive --driver=test_driver/integration_test.dart --target=integration_test/google_places_sdk_plus_it_test.dart
-        working-directory: ${{ env.dir }}/example
-        env:
-          PLACES_API_KEY: ${{ secrets.PLACES_API_KEY }}
+          cd google_places_sdk_plus_platform_interface
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
 
-  tests_android:
-    name: Run android tests on [${{ matrix.os }}] - [${{ matrix.api-level }}] [${{ matrix.target }}]
-    runs-on: macos-latest
-    needs: setup
+      - name: Generate code (http)
+        run: |
+          cd google_places_sdk_plus_http
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
 
-    strategy:
-      fail-fast: false
-      matrix:
-        api-level: [ 21 ] #, 29 ]
-        target: [ default ]
-        include:
-          - os: macos-latest
-            flutter_path: /Users/runner/hostedtoolcache/flutter
-#          - os: ubuntu-latest
-#            flutter_path: /opt/hostedtoolcache/flutter
+      # Monorepo: override deps to use local packages
+      - name: Setup local dependency overrides
+        run: |
+          write_overrides() {
+            local prefix="$1"
+            local target="$2"
+            {
+              echo "dependency_overrides:"
+              echo "  google_places_sdk_plus:"
+              echo "    path: ${prefix}google_places_sdk_plus"
+              echo "  google_places_sdk_plus_platform_interface:"
+              echo "    path: ${prefix}google_places_sdk_plus_platform_interface"
+              echo "  google_places_sdk_plus_android:"
+              echo "    path: ${prefix}google_places_sdk_plus_android"
+              echo "  google_places_sdk_plus_ios:"
+              echo "    path: ${prefix}google_places_sdk_plus_ios"
+              echo "  google_places_sdk_plus_web:"
+              echo "    path: ${prefix}google_places_sdk_plus_web"
+              echo "  google_places_sdk_plus_http:"
+              echo "    path: ${prefix}google_places_sdk_plus_http"
+              echo "  google_places_sdk_plus_linux:"
+              echo "    path: ${prefix}google_places_sdk_plus_linux"
+              echo "  google_places_sdk_plus_macos:"
+              echo "    path: ${prefix}google_places_sdk_plus_macos"
+              echo "  google_places_sdk_plus_windows:"
+              echo "    path: ${prefix}google_places_sdk_plus_windows"
+            } > "$target"
+          }
+          write_overrides "../" "google_places_sdk_plus/pubspec_overrides.yaml"
+          write_overrides "../../" "google_places_sdk_plus/example/pubspec_overrides.yaml"
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v1
-        with:
-          path: ${{ matrix.flutter_path }}
-          key: ${{ runner.os }}-flutter-${{ env.flutter_version }}
-      - uses: actions/setup-java@v1
-        with:
-          java-version: ${{ env.java_version }}
-      - name: Setup Android SDK # needs java
-        uses: android-actions/setup-android@v2
-      - uses: subosito/flutter-action@v1
-        with:
-          flutter-version: ${{ env.flutter_version }}
-      - name: Flutter version
-        run: flutter --version
-      - name: Build # needs android sdk
-        run: flutter build apk
-        working-directory: ${{ env.dir }}/example
-      - name: Integration Test
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: google_places_sdk_plus/example
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run real API integration tests on Android emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
+          api-level: 34
+          target: google_apis
           arch: x86_64
-          ndk: ${{ env.ndk_version }}
-          profile: Nexus 6
-          script: flutter drive --driver=test_driver/integration_test.dart --target=integration_test/google_places_sdk_plus_it_test.dart
-          working-directory: ${{ env.dir }}/example
-        env:
-          PLACES_API_KEY: ${{ secrets.PLACES_API_KEY }}
-
+          profile: pixel_6
+          script: >
+            flutter test
+            integration_test/real_api_test.dart
+            --dart-define=API_KEY=${{ secrets.PLACES_API_KEY }}
+          working-directory: google_places_sdk_plus/example
