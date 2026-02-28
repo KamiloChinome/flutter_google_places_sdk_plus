@@ -117,15 +117,14 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                     .setSessionToken(sessionToken)
                     .setOrigin(origin)
                     .build()
-                client!!.findAutocompletePredictions(request).addOnCompleteListener { task ->
+                val c = requireClient(result) ?: return
+                c.findAutocompletePredictions(request).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         lastSessionToken = request.sessionToken
                         val resultList = responseToList(task.result)
-                        print("findAutoCompletePredictions Result: $resultList")
                         result.success(resultList)
                     } else {
                         val exception = task.exception
-                        print("findAutoCompletePredictions Exception: $exception")
                         result.error(
                             "API_ERROR_AUTOCOMPLETE", exception?.message ?: "Unknown exception",
                             mapOf("type" to (exception?.javaClass?.toString() ?: "null"))
@@ -135,7 +134,11 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             }
 
             METHOD_FETCH_PLACE -> {
-                val placeId = call.argument<String>("placeId")!!
+                val placeId = call.argument<String>("placeId")
+                if (placeId == null) {
+                    result.error("INVALID_ARGUMENTS", "Missing required argument: placeId", null)
+                    return
+                }
                 val fields = call.argument<List<String>>("fields")?.mapNotNull { placeFieldFromStr(it) }
                     ?: emptyList()
                 val regionCode = call.argument<String>("regionCode")
@@ -144,18 +147,17 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                     .setSessionToken(getSessionToken(newSessionToken == true))
                     .setRegionCode(regionCode)
                     .build()
-                client!!.fetchPlace(request).addOnCompleteListener { task ->
+                val c = requireClient(result) ?: return
+                c.fetchPlace(request).addOnCompleteListener { task ->
                     // End session after fetchPlace (billing optimization).
                     // The next autocomplete call will create a new session token.
                     lastSessionToken = null
 
                     if (task.isSuccessful) {
                         val place = placeToMap(task.result?.place)
-                        print("FetchPlace Result: $place")
                         result.success(place)
                     } else {
                         val exception = task.exception
-                        print("FetchPlace Exception: $exception")
                         result.error(
                             "API_ERROR_PLACE", exception?.message ?: "Unknown exception",
                             mapOf("type" to (exception?.javaClass?.toString() ?: "null"))
@@ -166,7 +168,11 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
 
             METHOD_FETCH_PLACE_PHOTO -> {
                 val photoReference = call.argument<String>("photoReference")
-                val photoMetadata = photosCache[photoReference]!!
+                val photoMetadata = photosCache[photoReference]
+                if (photoMetadata == null) {
+                    result.error("API_ERROR_PHOTO", "PhotoMetadata not found in cache. It must be initially fetched with fetchPlace.", null)
+                    return
+                }
                 val maxWidth = call.argument<Int>("maxWidth")
                 val maxHeight = call.argument<Int>("maxHeight")
 
@@ -174,14 +180,13 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                     .setMaxWidth(maxWidth)
                     .setMaxHeight(maxHeight)
                     .build()
-                client!!.fetchResolvedPhotoUri(request).addOnCompleteListener { task ->
+                val c = requireClient(result) ?: return
+                c.fetchResolvedPhotoUri(request).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val photoUri = task.result?.uri?.toString()
-                        print("fetchPlacePhoto Result: $photoUri")
                         result.success(photoUri)
                     } else {
                         val exception = task.exception
-                        print("fetchPlacePhoto Exception: $exception")
                         result.error(
                             "API_ERROR_PHOTO", exception?.message ?: "Unknown exception",
                             mapOf("type" to (exception?.javaClass?.toString() ?: "null"))
@@ -191,7 +196,11 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
             }
 
             METHOD_SEARCH_BY_TEXT -> {
-                val textQuery = call.argument<String>("textQuery")!!
+                val textQuery = call.argument<String>("textQuery")
+                if (textQuery == null) {
+                    result.error("INVALID_ARGUMENTS", "Missing required argument: textQuery", null)
+                    return
+                }
                 val includedType = call.argument<String>("includedType")
                 val maxResultCount = call.argument<Int>("maxResultCount")
                 val minRating = call.argument<Double>("minRating")
@@ -223,14 +232,13 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                     requestBuilder.setRegionCode(regionCode)
                 }
                 val request = requestBuilder.build()
-                client!!.searchByText(request).addOnCompleteListener { task ->
+                val c = requireClient(result) ?: return
+                c.searchByText(request).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val places = task.result?.places?.map { placeToMap(it) }
-                        print("searchByText Result: $places")
                         result.success(places)
                     } else {
                         val exception = task.exception
-                        print("searchByText Exception: $exception")
                         result.error(
                             "API_ERROR_SEARCH_BY_TEXT", exception?.message ?: "Unknown exception",
                             mapOf("type" to (exception?.javaClass?.toString() ?: "null"))
@@ -244,6 +252,10 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                     ?: emptyList()
                 val locationRestriction =
                     circularBoundsFromMap(call.argument<Map<String, Any?>>("locationRestriction"))
+                if (locationRestriction == null) {
+                    result.error("INVALID_ARGUMENTS", "locationRestriction is required for searchNearby", null)
+                    return
+                }
                 val excludedPrimaryTypes = call.argument<List<String>>("excludedPrimaryTypes")
                     ?: emptyList()
                 val excludedTypes = call.argument<List<String>>("excludedTypes")
@@ -258,7 +270,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                 )
                 val regionCode = call.argument<String>("regionCode")
                 val maxResultCount = call.argument<Int>("maxResultCount")
-                val request = SearchNearbyRequest.builder(locationRestriction!!, fields)
+                val request = SearchNearbyRequest.builder(locationRestriction, fields)
                     .setExcludedPrimaryTypes(excludedPrimaryTypes)
                     .setExcludedTypes(excludedTypes)
                     .setIncludedPrimaryTypes(includedPrimaryTypes)
@@ -267,14 +279,13 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                     .setRegionCode(regionCode)
                     .setMaxResultCount(maxResultCount)
                     .build()
-                client!!.searchNearby(request).addOnCompleteListener { task ->
+                val c = requireClient(result) ?: return
+                c.searchNearby(request).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val places = task.result?.places?.map { placeToMap(it) }
-                        print("searchNearby Result: $places")
                         result.success(places)
                     } else {
                         val exception = task.exception
-                        print("searchNearby Exception: $exception")
                         result.error(
                             "API_ERROR_NEARBY_SEARCH", exception?.message ?: "Unknown exception",
                             mapOf("type" to (exception?.javaClass?.toString() ?: "null"))
@@ -320,6 +331,14 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
         val northEast = latLngFromMap(argument["northeast"] as? Map<String, Any?>) ?: return null
 
         return LatLngBounds(southWest, northEast)
+    }
+
+    private fun requireClient(result: MethodChannel.Result): PlacesClient? {
+        val c = client
+        if (c == null) {
+            result.error("CLIENT_NOT_INITIALIZED", "PlacesClient has not been initialized. Call initialize() first.", null)
+        }
+        return c
     }
 
     private fun getSessionToken(force: Boolean): AutocompleteSessionToken {

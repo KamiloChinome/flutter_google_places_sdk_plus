@@ -1,3 +1,11 @@
+## 0.3.3
+
+* Remove all `print()` debug statements from native plugin
+* Fix PriceLevel serialization to return string values matching Android (e.g. `"PRICE_LEVEL_MODERATE"` instead of raw int `2`)
+* Fix error codes: autocomplete now returns `API_ERROR_AUTOCOMPLETE` and fetchPlace returns `API_ERROR_PLACE` (both previously returned generic `API_ERROR`)
+* Replace force unwraps (`as!`) with safe `guard let` checks that return `FlutterError` instead of crashing
+* Fix implicitly unwrapped optional return type on `getSessionToken()`
+
 ## 0.3.2
 
 * Fix: session token was not cleared after `fetchPlace()`, causing subsequent autocomplete searches to reuse a stale token and break session billing boundaries. The token is now invalidated after every `fetchPlace()` call.
