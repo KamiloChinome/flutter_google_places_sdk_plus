@@ -403,7 +403,7 @@ class FlutterGooglePlacesSdkPlugin : FlutterPlugin, MethodCallHandler {
                 "EvChargeAmenitySummary" -> Place.Field.EV_CHARGE_AMENITY_SUMMARY
                 else -> Place.Field.valueOf(it.toScreamingSnakeCase())
             }
-        } catch (_: IllegalArgumentException) {
+        } catch (_: Exception) {
             Log.w(TAG, "Unsupported placeField on Android, ignoring: $it")
             return null
         }

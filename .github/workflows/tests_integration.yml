@@ -39,7 +39,7 @@ jobs:
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y ninja-build libgtk-3-dev
+          sudo apt-get install -y ninja-build libgtk-3-dev xvfb
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -96,7 +96,7 @@ jobs:
         working-directory: google_places_sdk_plus/example
 
       - name: Run mocked integration tests
-        run: flutter test integration_test/mocked_places_test.dart -d linux
+        run: xvfb-run flutter test integration_test/mocked_places_test.dart -d linux
         working-directory: google_places_sdk_plus/example
 
   real-api-android:
