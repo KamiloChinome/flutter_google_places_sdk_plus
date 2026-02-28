@@ -438,7 +438,10 @@ class _MyHomePageState extends State<MyHomePage> {
     return [
       Row(
         children: [
-          if (isInit) const Icon(Icons.check, color: Colors.green) else const Icon(Icons.close, color: Colors.red),
+          if (isInit)
+            const Icon(Icons.check, color: Colors.green)
+          else
+            const Icon(Icons.close, color: Colors.red),
           Text('Initialized: ' + (isInit ? 'true' : 'false')),
         ],
       ),
@@ -849,7 +852,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     if (place.types != null)
                       Text(
                         'Types: ${place.types!.map((t) => t.name).join(", ")}',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     const Divider(thickness: 2),
                   ],
@@ -885,7 +891,6 @@ typedef ActionWithBounds = void Function(LatLngBounds);
 
 /// Location widget used to display and edit a LatLngBounds type
 class LocationField extends StatefulWidget {
-
   /// Create a LocationField
   const LocationField({
     Key? key,
@@ -894,6 +899,7 @@ class LocationField extends StatefulWidget {
     required this.value,
     required this.onChanged,
   }) : super(key: key);
+
   /// Label associated with this field
   final String label;
 
@@ -992,12 +998,12 @@ class _LocationFieldState extends State<LocationField> {
 /// If the platform is web, the widget created is [SelectableText].
 /// Otherwise, it's a [Text].
 class WebSelectableText extends StatelessWidget {
-
   /// Creates a web-selectable text widget.
   ///
   /// If the platform is web, the widget created is [SelectableText].
   /// Otherwise, it's a [Text].
   const WebSelectableText(this.data, {Key? key}) : super(key: key);
+
   /// The text to display.
   ///
   /// This will be null if a [textSpan] is provided instead.

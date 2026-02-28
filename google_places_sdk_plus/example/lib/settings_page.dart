@@ -4,9 +4,9 @@ import 'package:google_places_sdk_plus_example/constants.dart';
 
 /// Settings page of an example
 class SettingsPage extends StatefulWidget {
-
   /// Create a settings page
   const SettingsPage(this.places);
+
   /// Places client that can be used to update the settings
   final FlutterGooglePlacesSdk places;
 
@@ -47,10 +47,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: Padding(
-        padding: const EdgeInsets.all(30),
-        child: _buildForm(),
-      ),
+      body: Padding(padding: const EdgeInsets.all(30), child: _buildForm()),
     );
   }
 
@@ -61,8 +58,9 @@ class _SettingsPageState extends State<SettingsPage> {
           TextFormField(
             decoration: InputDecoration(
               label: const Text('API Key'),
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
             ),
             controller: _controllerApiKey,
           ),
@@ -89,7 +87,10 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       _updating = true;
     });
-    await widget.places.updateSettings(apiKey: _selectedKey, locale: _selectedLocale);
+    await widget.places.updateSettings(
+      apiKey: _selectedKey,
+      locale: _selectedLocale,
+    );
     setState(() {
       _lastLocale = _selectedLocale;
       _lastKey = _selectedKey;
@@ -99,9 +100,8 @@ class _SettingsPageState extends State<SettingsPage> {
 }
 
 class _LocaleFormField extends StatefulWidget {
-
   const _LocaleFormField({Key? key, this.value, required this.onChanged})
-      : super(key: key);
+    : super(key: key);
   final Locale? value;
   final void Function(Locale) onChanged;
 
@@ -125,8 +125,9 @@ class _LocaleFormFieldState extends State<_LocaleFormField> {
   }
 
   void _onChange() {
-    final country =
-        _countryController.text.isEmpty ? null : _countryController.text;
+    final country = _countryController.text.isEmpty
+        ? null
+        : _countryController.text;
     final locale = Locale(_languageController.text, country);
     widget.onChanged(locale);
   }
@@ -138,19 +139,23 @@ class _LocaleFormFieldState extends State<_LocaleFormField> {
         label: const Text('Locale'),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
       ),
-      child: Row(children: [
-        Flexible(
+      child: Row(
+        children: [
+          Flexible(
             child: TextFormField(
-          decoration: const InputDecoration(label: Text('Language')),
-          controller: _languageController,
-        )),
-        const SizedBox(width: 15),
-        Flexible(
+              decoration: const InputDecoration(label: Text('Language')),
+              controller: _languageController,
+            ),
+          ),
+          const SizedBox(width: 15),
+          Flexible(
             child: TextFormField(
-          decoration: const InputDecoration(label: Text('Country')),
-          controller: _countryController,
-        )),
-      ]),
+              decoration: const InputDecoration(label: Text('Country')),
+              controller: _countryController,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -14,7 +14,6 @@ part 'place_autocomplete_prediction.g.dart';
 /// Prediction result from google maps api.
 @freezed
 sealed class PlaceAutocompletePrediction with _$PlaceAutocompletePrediction {
-
   /// Construct a [PlaceAutocompletePrediction] object.
   const factory PlaceAutocompletePrediction({
     /// Contains the human-readable name for the returned result.

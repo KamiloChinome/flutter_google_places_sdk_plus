@@ -571,7 +571,6 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     String? regionCode,
     bool? strictTypeFiltering,
   }) async {
-
     final request = SearchByTextRequest(
       textQuery: textQuery,
       fields: _mapFields(fields),
@@ -617,7 +616,6 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     String? regionCode,
     int? maxResultCount,
   }) async {
-
     final restriction =
         core.CircleLiteral(
               center: core.LatLngLiteral(

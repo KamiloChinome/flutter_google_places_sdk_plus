@@ -6,13 +6,13 @@ import 'package:web/web.dart' as web;
 
 /// Widget used to display google place image. Used in web platforms
 class GooglePlacesImg extends StatelessWidget {
-
   /// Construct a google place img using metadata and response object
   const GooglePlacesImg({
     Key? key,
     required this.photoMetadata,
     required this.placePhotoResponse,
   }) : super(key: key);
+
   /// The photo metadata
   final PhotoMetadata photoMetadata;
 

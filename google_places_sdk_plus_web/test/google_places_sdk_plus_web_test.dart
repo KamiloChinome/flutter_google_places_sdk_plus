@@ -20,61 +20,42 @@ void main() {
       await plugin.deinitialize();
     });
 
-    test(
-      'initialize should complete successfully',
-      () async {
-        if (skipTests) {
-          return;
-        }
-        await plugin.initialize(apiKey);
-        expect(await plugin.isInitialized(), isTrue);
-      },
-      skip: skipTests,
-    );
+    test('initialize should complete successfully', () async {
+      if (skipTests) {
+        return;
+      }
+      await plugin.initialize(apiKey);
+      expect(await plugin.isInitialized(), isTrue);
+    }, skip: skipTests);
 
-    test(
-      'isInitialized should return false before initialization',
-      () async {
-        expect(await plugin.isInitialized(), isFalse);
-      },
-    );
+    test('isInitialized should return false before initialization', () async {
+      expect(await plugin.isInitialized(), isFalse);
+    });
 
-    test(
-      'isInitialized should return true after initialization',
-      () async {
-        if (skipTests) {
-          return;
-        }
-        await plugin.initialize(apiKey);
-        expect(await plugin.isInitialized(), isTrue);
-      },
-      skip: skipTests,
-    );
+    test('isInitialized should return true after initialization', () async {
+      if (skipTests) {
+        return;
+      }
+      await plugin.initialize(apiKey);
+      expect(await plugin.isInitialized(), isTrue);
+    }, skip: skipTests);
 
-    test(
-      'initialize with locale should set language',
-      () async {
-        if (skipTests) {
-          return;
-        }
-        await plugin.initialize(apiKey, locale: const Locale('fr', 'FR'));
-        expect(await plugin.isInitialized(), isTrue);
-      },
-      skip: skipTests,
-    );
+    test('initialize with locale should set language', () async {
+      if (skipTests) {
+        return;
+      }
+      await plugin.initialize(apiKey, locale: const Locale('fr', 'FR'));
+      expect(await plugin.isInitialized(), isTrue);
+    }, skip: skipTests);
 
-    test(
-      'updateSettings should update language',
-      () async {
-        if (skipTests) {
-          return;
-        }
-        await plugin.initialize(apiKey);
-        await plugin.updateSettings(apiKey, locale: const Locale('es', 'ES'));
-        expect(await plugin.isInitialized(), isTrue);
-      },
-      skip: skipTests,
-    );
+    test('updateSettings should update language', () async {
+      if (skipTests) {
+        return;
+      }
+      await plugin.initialize(apiKey);
+      await plugin.updateSettings(apiKey, locale: const Locale('es', 'ES'));
+      expect(await plugin.isInitialized(), isTrue);
+    }, skip: skipTests);
 
     test(
       'findAutocompletePredictions should return results for valid query',
@@ -99,15 +80,16 @@ void main() {
           return;
         }
         await plugin.initialize(apiKey);
-        
+
         // Test with a simple, common query that should return results
         // Fix: AutocompleteSessionToken is now automatically created
         final response = await plugin.findAutocompletePredictions('New York');
-        
+
         expect(
           response.predictions,
           isNotEmpty,
-          reason: 'Expected results for query "New York". '
+          reason:
+              'Expected results for query "New York". '
               'Actual: ${response.predictions.length} results.',
         );
         expect(response.predictions.first.placeId, isNotEmpty);
@@ -124,23 +106,24 @@ void main() {
           return;
         }
         await plugin.initialize(apiKey);
-        
+
         // Test multiple queries
         final queries = ['Paris', 'London', 'Tokyo', 'restaurant', 'coffee'];
         final withResults = <String>[];
-        
+
         for (final query in queries) {
           final response = await plugin.findAutocompletePredictions(query);
           if (response.predictions.isNotEmpty) {
             withResults.add(query);
           }
         }
-        
+
         // All queries should return results
         expect(
           withResults.length,
           equals(queries.length),
-          reason: 'Expected all queries to return results. '
+          reason:
+              'Expected all queries to return results. '
               'Queries with results: ${withResults.join(", ")}. '
               'Queries without results: ${queries.where((q) => !withResults.contains(q)).join(", ")}.',
         );
@@ -339,11 +322,9 @@ void main() {
             photoMetadatas.first,
             maxWidth: 400,
           );
-          expect(
-            photoResponse,
-            isA<FetchPlacePhotoResponseImageUrl>(),
-          );
-          final imageUrlResponse = photoResponse as FetchPlacePhotoResponseImageUrl;
+          expect(photoResponse, isA<FetchPlacePhotoResponseImageUrl>());
+          final imageUrlResponse =
+              photoResponse as FetchPlacePhotoResponseImageUrl;
           expect(imageUrlResponse.imageUrl, isNotEmpty);
         }
       },
@@ -351,31 +332,23 @@ void main() {
       timeout: const Timeout(Duration(seconds: 30)),
     );
 
-    test(
-      'deinitialize should complete without error',
-      () async {
-        if (skipTests) {
-          return;
-        }
-        await plugin.initialize(apiKey);
-        await plugin.deinitialize();
-        // deinitialize doesn't change initialized state on web
-        expect(await plugin.isInitialized(), isTrue);
-      },
-      skip: skipTests,
-    );
+    test('deinitialize should complete without error', () async {
+      if (skipTests) {
+        return;
+      }
+      await plugin.initialize(apiKey);
+      await plugin.deinitialize();
+      // deinitialize doesn't change initialized state on web
+      expect(await plugin.isInitialized(), isTrue);
+    }, skip: skipTests);
 
-    test(
-      'multiple initialize calls should not fail',
-      () async {
-        if (skipTests) {
-          return;
-        }
-        await plugin.initialize(apiKey);
-        await plugin.initialize(apiKey);
-        expect(await plugin.isInitialized(), isTrue);
-      },
-      skip: skipTests,
-    );
+    test('multiple initialize calls should not fail', () async {
+      if (skipTests) {
+        return;
+      }
+      await plugin.initialize(apiKey);
+      await plugin.initialize(apiKey);
+      expect(await plugin.isInitialized(), isTrue);
+    }, skip: skipTests);
   });
 }
