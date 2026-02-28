@@ -1,77 +1,145 @@
 // ignore_for_file: public_member_api_docs
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_places_sdk_plus/google_places_sdk_plus.dart';
 import 'package:integration_test/integration_test.dart';
 
+/// A mock platform that returns canned data without any real API or
+/// MethodChannel calls.  Works on every host (Linux, macOS, Windows …).
+class _MockPlatform extends FlutterGooglePlacesSdkPlatform {
+  FindAutocompletePredictionsResponse? autocompleteResponse;
+  FetchPlaceResponse? fetchPlaceResponse;
+  SearchByTextResponse? searchByTextResponse;
+  SearchNearbyResponse? searchNearbyResponse;
+  bool initialized = false;
+  Exception? exceptionToThrow;
+
+  @override
+  Future<void> initialize(String apiKey, {Locale? locale}) async {
+    initialized = true;
+  }
+
+  @override
+  Future<bool?> isInitialized() async => initialized;
+
+  @override
+  Future<void> updateSettings(String apiKey, {Locale? locale}) async {}
+
+  @override
+  Future<FindAutocompletePredictionsResponse> findAutocompletePredictions(
+    String query, {
+    List<String>? countries,
+    List<String> placeTypesFilter = const [],
+    bool? newSessionToken,
+    LatLng? origin,
+    LatLngBounds? locationBias,
+    LatLngBounds? locationRestriction,
+  }) async {
+    if (exceptionToThrow != null) throw exceptionToThrow!;
+    return autocompleteResponse ??
+        const FindAutocompletePredictionsResponse([]);
+  }
+
+  @override
+  Future<FetchPlaceResponse> fetchPlace(
+    String placeId, {
+    required List<PlaceField> fields,
+    bool? newSessionToken,
+    String? regionCode,
+  }) async {
+    if (exceptionToThrow != null) throw exceptionToThrow!;
+    return fetchPlaceResponse ?? const FetchPlaceResponse(null);
+  }
+
+  @override
+  Future<FetchPlacePhotoResponse> fetchPlacePhoto(
+    PhotoMetadata photoMetadata, {
+    int? maxWidth,
+    int? maxHeight,
+  }) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<SearchByTextResponse> searchByText(
+    String textQuery, {
+    required List<PlaceField> fields,
+    String? includedType,
+    int? maxResultCount,
+    LatLngBounds? locationBias,
+    LatLngBounds? locationRestriction,
+    double? minRating,
+    bool? openNow,
+    List<PriceLevel>? priceLevels,
+    TextSearchRankPreference? rankPreference,
+    String? regionCode,
+    bool? strictTypeFiltering,
+  }) async {
+    if (exceptionToThrow != null) throw exceptionToThrow!;
+    return searchByTextResponse ?? const SearchByTextResponse([]);
+  }
+
+  @override
+  Future<SearchNearbyResponse> searchNearby({
+    required List<PlaceField> fields,
+    required CircularBounds locationRestriction,
+    List<String>? includedTypes,
+    List<String>? includedPrimaryTypes,
+    List<String>? excludedTypes,
+    List<String>? excludedPrimaryTypes,
+    NearbySearchRankPreference? rankPreference,
+    String? regionCode,
+    int? maxResultCount,
+  }) async {
+    if (exceptionToThrow != null) throw exceptionToThrow!;
+    return searchNearbyResponse ?? const SearchNearbyResponse([]);
+  }
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  const channelName = 'plugins.msh.com/google_places_sdk_plus';
-
   late FlutterGooglePlacesSdk sdk;
+  late _MockPlatform mockPlatform;
 
-  const mockPrediction = <String, dynamic>{
-    'placeId': 'ChIJN1t_tDeuEmsRUsoyG83frY4',
-    'distanceMeters': 12345,
-    'primaryText': 'Test Place',
-    'secondaryText': 'Test City',
-    'fullText': 'Test Place, Test City',
-  };
+  const mockPrediction = AutocompletePrediction(
+    placeId: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
+    distanceMeters: 12345,
+    primaryText: 'Test Place',
+    secondaryText: 'Test City',
+    fullText: 'Test Place, Test City',
+  );
 
-  const mockPlace = <String, dynamic>{
-    'id': 'ChIJN1t_tDeuEmsRUsoyG83frY4',
-    'latLng': {'lat': -33.8688, 'lng': 151.2093},
-    'address': '123 Test St, Sydney, Australia',
-    'addressComponents': <Map<String, dynamic>>[],
-    'businessStatus': 'OPERATIONAL',
-    'attributions': <String>[],
-    'name': 'Sydney Opera House',
-    'openingHours': null,
-    'phoneNumber': '+61 2 9250 7111',
-    'photoMetadatas': <Map<String, dynamic>>[],
-    'plusCode': null,
-    'priceLevel': null,
-    'rating': 4.6,
-    'types': <String>['point_of_interest', 'establishment'],
-    'userRatingsTotal': 50000,
-    'utcOffsetMinutes': 600,
-    'viewport': null,
-    'websiteUri': 'https://www.sydneyoperahouse.com',
-    'reviews': <Map<String, dynamic>>[],
-  };
+  final mockPlace = Place(
+    id: 'ChIJN1t_tDeuEmsRUsoyG83frY4',
+    latLng: const LatLng(lat: -33.8688, lng: 151.2093),
+    address: '123 Test St, Sydney, Australia',
+    addressComponents: const [],
+    businessStatus: BusinessStatus.Operational,
+    attributions: const [],
+    name: 'Sydney Opera House',
+    phoneNumber: '+61 2 9250 7111',
+    photoMetadatas: const [],
+    rating: 4.6,
+    userRatingsTotal: 50000,
+    utcOffsetMinutes: 600,
+    websiteUri: Uri.parse('https://www.sydneyoperahouse.com'),
+    reviews: const [],
+  );
 
   setUp(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(const MethodChannel(channelName), (
-          MethodCall call,
-        ) async {
-          switch (call.method) {
-            case 'initialize':
-              return null;
-            case 'isInitialized':
-              return true;
-            case 'findAutocompletePredictions':
-              return <Map<String, dynamic>>[mockPrediction];
-            case 'fetchPlace':
-              return mockPlace;
-            case 'fetchPlacePhoto':
-              return 'https://example.com/photo.jpg';
-            case 'searchByText':
-              return <Map<String, dynamic>>[mockPlace];
-            case 'searchNearby':
-              return <Map<String, dynamic>>[mockPlace];
-            default:
-              return null;
-          }
-        });
-    sdk = FlutterGooglePlacesSdk('test-api-key');
-  });
+    mockPlatform = _MockPlatform()
+      ..autocompleteResponse = const FindAutocompletePredictionsResponse([
+        mockPrediction,
+      ])
+      ..fetchPlaceResponse = FetchPlaceResponse(mockPlace)
+      ..searchByTextResponse = SearchByTextResponse([mockPlace])
+      ..searchNearbyResponse = SearchNearbyResponse([mockPlace]);
 
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(const MethodChannel(channelName), null);
+    FlutterGooglePlacesSdk.platform = mockPlatform;
+    sdk = FlutterGooglePlacesSdk('test-api-key');
   });
 
   group('Mocked Integration Tests', () {
@@ -161,19 +229,9 @@ void main() {
     testWidgets('findAutocompletePredictions with empty results', (
       WidgetTester tester,
     ) async {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(const MethodChannel(channelName), (
-            MethodCall call,
-          ) async {
-            switch (call.method) {
-              case 'initialize':
-                return null;
-              case 'findAutocompletePredictions':
-                return <Map<String, dynamic>>[];
-              default:
-                return null;
-            }
-          });
+      final emptyPlatform = _MockPlatform()
+        ..autocompleteResponse = const FindAutocompletePredictionsResponse([]);
+      FlutterGooglePlacesSdk.platform = emptyPlatform;
 
       final newSdk = FlutterGooglePlacesSdk('test-key');
       final result = await newSdk.findAutocompletePredictions('xyzabc123');
@@ -183,22 +241,12 @@ void main() {
     testWidgets('fetchPlace handles PlatformException', (
       WidgetTester tester,
     ) async {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(const MethodChannel(channelName), (
-            MethodCall call,
-          ) async {
-            switch (call.method) {
-              case 'initialize':
-                return null;
-              case 'fetchPlace':
-                throw PlatformException(
-                  code: 'API_ERROR_PLACE',
-                  message: 'Place not found',
-                );
-              default:
-                return null;
-            }
-          });
+      final errorPlatform = _MockPlatform()
+        ..exceptionToThrow = PlatformException(
+          code: 'API_ERROR_PLACE',
+          message: 'Place not found',
+        );
+      FlutterGooglePlacesSdk.platform = errorPlatform;
 
       final newSdk = FlutterGooglePlacesSdk('test-key');
       expect(
@@ -208,19 +256,9 @@ void main() {
     });
 
     testWidgets('searchByText with empty results', (WidgetTester tester) async {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(const MethodChannel(channelName), (
-            MethodCall call,
-          ) async {
-            switch (call.method) {
-              case 'initialize':
-                return null;
-              case 'searchByText':
-                return <Map<String, dynamic>>[];
-              default:
-                return null;
-            }
-          });
+      final emptyPlatform = _MockPlatform()
+        ..searchByTextResponse = const SearchByTextResponse([]);
+      FlutterGooglePlacesSdk.platform = emptyPlatform;
 
       final newSdk = FlutterGooglePlacesSdk('test-key');
       final result = await newSdk.searchByText(
