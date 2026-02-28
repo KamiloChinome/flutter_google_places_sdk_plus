@@ -1,5 +1,5 @@
-import 'package:google_places_sdk_plus_platform_interface/src/types/lat_lng.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:google_places_sdk_plus_platform_interface/src/types/lat_lng.dart';
 
 part 'circular_bounds.freezed.dart';
 part 'circular_bounds.g.dart';

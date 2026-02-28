@@ -7,28 +7,30 @@ environment:
   sdk: ">=3.8.0 <4.0.0"
 
 dependencies:
+  collection: any
   flutter:
     sdk: flutter
   google_places_sdk_plus:
     path: ../../google_places_sdk_plus
+  web: any
 
 dependency_overrides:
-  google_places_sdk_plus_platform_interface:
-    path: ../../google_places_sdk_plus_platform_interface
-  google_places_sdk_plus_ios:
-    path: ../../google_places_sdk_plus_ios
-  google_places_sdk_plus_web:
-    path: ../../google_places_sdk_plus_web
   google_places_sdk_plus_android:
     path: ../../google_places_sdk_plus_android
-  google_places_sdk_plus_windows:
-    path: ../../google_places_sdk_plus_windows
+  google_places_sdk_plus_http:
+    path: ../../google_places_sdk_plus_http
+  google_places_sdk_plus_ios:
+    path: ../../google_places_sdk_plus_ios
   google_places_sdk_plus_linux:
     path: ../../google_places_sdk_plus_linux
   google_places_sdk_plus_macos:
     path: ../../google_places_sdk_plus_macos
-  google_places_sdk_plus_http:
-    path: ../../google_places_sdk_plus_http
+  google_places_sdk_plus_platform_interface:
+    path: ../../google_places_sdk_plus_platform_interface
+  google_places_sdk_plus_web:
+    path: ../../google_places_sdk_plus_web
+  google_places_sdk_plus_windows:
+    path: ../../google_places_sdk_plus_windows
 
 dev_dependencies:
   flutter_test:

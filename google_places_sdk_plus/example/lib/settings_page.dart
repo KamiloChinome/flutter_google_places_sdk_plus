@@ -4,11 +4,11 @@ import 'package:google_places_sdk_plus_example/constants.dart';
 
 /// Settings page of an example
 class SettingsPage extends StatefulWidget {
-  /// Places client that can be used to update the settings
-  final FlutterGooglePlacesSdk places;
 
   /// Create a settings page
   const SettingsPage(this.places);
+  /// Places client that can be used to update the settings
+  final FlutterGooglePlacesSdk places;
 
   @override
   State<StatefulWidget> createState() => _SettingsPageState();
@@ -18,7 +18,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final _controllerApiKey = TextEditingController();
 
   var _lastKey = INITIAL_API_KEY;
-  get _selectedKey => _controllerApiKey.text;
+  String get _selectedKey => _controllerApiKey.text;
 
   Locale? _lastLocale;
   Locale? _selectedLocale;
@@ -48,7 +48,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: Padding(
-        padding: EdgeInsets.all(30),
+        padding: const EdgeInsets.all(30),
         child: _buildForm(),
       ),
     );
@@ -60,13 +60,13 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           TextFormField(
             decoration: InputDecoration(
-              label: Text("API Key"),
+              label: const Text('API Key'),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
             ),
             controller: _controllerApiKey,
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           _LocaleFormField(
             value: _lastLocale,
             onChanged: (locale) {
@@ -85,7 +85,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _applyChanges() async {
+  Future<void> _applyChanges() async {
     setState(() {
       _updating = true;
     });
@@ -99,11 +99,11 @@ class _SettingsPageState extends State<SettingsPage> {
 }
 
 class _LocaleFormField extends StatefulWidget {
-  final Locale? value;
-  final void Function(Locale) onChanged;
 
   const _LocaleFormField({Key? key, this.value, required this.onChanged})
       : super(key: key);
+  final Locale? value;
+  final void Function(Locale) onChanged;
 
   @override
   State<StatefulWidget> createState() => _LocaleFormFieldState();
@@ -135,19 +135,19 @@ class _LocaleFormFieldState extends State<_LocaleFormField> {
   Widget build(BuildContext context) {
     return InputDecorator(
       decoration: InputDecoration(
-        label: Text("Locale"),
+        label: const Text('Locale'),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
       ),
       child: Row(children: [
         Flexible(
             child: TextFormField(
-          decoration: InputDecoration(label: Text("Language")),
+          decoration: const InputDecoration(label: Text('Language')),
           controller: _languageController,
         )),
-        SizedBox(width: 15),
+        const SizedBox(width: 15),
         Flexible(
             child: TextFormField(
-          decoration: InputDecoration(label: Text("Country")),
+          decoration: const InputDecoration(label: Text('Country')),
           controller: _countryController,
         )),
       ]),

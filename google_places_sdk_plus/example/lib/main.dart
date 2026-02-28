@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: title,
       theme: ThemeData(primaryColor: Colors.blueAccent),
-      home: MyHomePage(),
+      home: const MyHomePage(),
     );
   }
 }
@@ -53,13 +53,13 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> _placeTypesFilter = ['establishment'];
 
   bool _locationBiasEnabled = true;
-  LatLngBounds _locationBias = LatLngBounds(
+  LatLngBounds _locationBias = const LatLngBounds(
     southwest: LatLng(lat: 32.0810305, lng: 34.785707),
     northeast: LatLng(lat: 32.0935937, lng: 34.8013896),
   );
 
   bool _locationRestrictionEnabled = false;
-  LatLngBounds _locationRestriction = LatLngBounds(
+  LatLngBounds _locationRestriction = const LatLngBounds(
     southwest: LatLng(lat: 32.0583974, lng: 34.7633473),
     northeast: LatLng(lat: 32.0876885, lng: 34.8040563),
   );
@@ -74,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //
   final TextEditingController _fetchPlaceIdController = TextEditingController();
-  List<PlaceField> _placeFields = PlaceField.values;
+  final List<PlaceField> _placeFields = PlaceField.values;
 
   // List<PlaceField> _placeFields = [
   //   PlaceField.Address,
@@ -120,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
   TextSearchRankPreference? _searchByTextRankPreference;
 
   bool _searchByTextLocationBiasEnabled = false;
-  LatLngBounds _searchByTextLocationBias = LatLngBounds(
+  LatLngBounds _searchByTextLocationBias = const LatLngBounds(
     southwest: LatLng(lat: 32.0810305, lng: 34.785707),
     northeast: LatLng(lat: 32.0935937, lng: 34.8013896),
   );
@@ -133,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int? _searchNearbyMaxResults;
   NearbySearchRankPreference? _searchNearbyRankPreference;
 
-  LatLng _searchNearbyCenter = LatLng(lat: 32.0853, lng: 34.7818);
+  LatLng _searchNearbyCenter = const LatLng(lat: 32.0853, lng: 34.7818);
   double _searchNearbyRadius = 500.0;
 
   @override
@@ -175,26 +175,26 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: const Text(title),
         actions: [
-          new IconButton(
+          IconButton(
             onPressed: _openSettingsModal,
             icon: const Icon(Icons.settings),
           ),
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(30),
+        padding: const EdgeInsets.all(30),
         child: ListView(
           children:
               initWidgets +
-              [SizedBox(height: 16)] +
+              [const SizedBox(height: 16)] +
               predictionsWidgets +
-              [SizedBox(height: 16)] +
+              [const SizedBox(height: 16)] +
               fetchPlaceWidgets +
-              [SizedBox(height: 16)] +
+              [const SizedBox(height: 16)] +
               fetchPlacePhotoWidgets +
-              [SizedBox(height: 16)] +
+              [const SizedBox(height: 16)] +
               searchByTextWidgets +
-              [SizedBox(height: 16)] +
+              [const SizedBox(height: 16)] +
               searchNearbyWidgets,
         ),
       ),
@@ -210,16 +210,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String? _countriesValidator(String? input) {
-    if (input == null || input.length == 0) {
+    if (input == null || input.isEmpty) {
       return null; // valid
     }
 
     return input
-        .split(",")
+        .split(',')
         .map((part) => part.trim())
         .map((part) {
           if (part.length != 2) {
-            return "Country part '${part}' must be 2 characters";
+            return "Country part '$part' must be 2 characters";
           }
           return null;
         })
@@ -228,10 +228,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onCountriesTextChanged(String countries) {
-    _countries = (countries == "")
+    _countries = (countries == '')
         ? []
         : countries
-              .split(",")
+              .split(',')
               .map((item) => item.trim())
               .toList(growable: false);
   }
@@ -240,7 +240,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _predictLastText = value;
   }
 
-  void _fetchPlace() async {
+  Future<void> _fetchPlace() async {
     if (_fetchingPlace) {
       return;
     }
@@ -275,7 +275,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _predict() async {
+  Future<void> _predict() async {
     if (_predicting) {
       return;
     }
@@ -297,7 +297,7 @@ class _MyHomePageState extends State<MyHomePage> {
         countries: _countriesEnabled ? _countries : null,
         placeTypesFilter: _placeTypesFilter,
         newSessionToken: false,
-        origin: LatLng(lat: 43.12, lng: 95.20),
+        origin: const LatLng(lat: 43.12, lng: 95.20),
         locationBias: _locationBiasEnabled ? _locationBias : null,
         locationRestriction: _locationRestrictionEnabled
             ? _locationRestriction
@@ -361,7 +361,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
   }
 
-  void _fetchPlacePhoto() async {
+  Future<void> _fetchPlacePhoto() async {
     final place = _place;
     if (_fetchingPlacePhoto || place == null) {
       return;
@@ -370,7 +370,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if ((place.photoMetadatas?.length ?? 0) == 0) {
       setState(() {
         _fetchingPlacePhoto = false;
-        _fetchingPlacePhotoErr = "No photos for place";
+        _fetchingPlacePhotoErr = 'No photos for place';
       });
       return;
     }
@@ -438,15 +438,13 @@ class _MyHomePageState extends State<MyHomePage> {
     return [
       Row(
         children: [
-          isInit
-              ? Icon(Icons.check, color: Colors.green)
-              : Icon(Icons.close, color: Colors.red),
+          if (isInit) const Icon(Icons.check, color: Colors.green) else const Icon(Icons.close, color: Colors.red),
           Text('Initialized: ' + (isInit ? 'true' : 'false')),
         ],
       ),
       ElevatedButton(
         onPressed: isInit ? null : _doInit,
-        child: Text('Initialize!'),
+        child: const Text('Initialize!'),
       ),
     ];
   }
@@ -456,7 +454,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // --
       TextFormField(
         onChanged: _onPredictTextChanged,
-        decoration: InputDecoration(label: Text("Query")),
+        decoration: const InputDecoration(label: Text('Query')),
       ),
       // -- Countries
       _buildEnabledOption(
@@ -465,10 +463,10 @@ class _MyHomePageState extends State<MyHomePage> {
         TextFormField(
           enabled: _countriesEnabled,
           onChanged: _onCountriesTextChanged,
-          decoration: InputDecoration(label: Text("Countries")),
+          decoration: const InputDecoration(label: Text('Countries')),
           validator: _countriesValidator,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          initialValue: _countries.join(","),
+          initialValue: _countries.join(','),
         ),
       ),
       // -- Place Types
@@ -487,7 +485,7 @@ class _MyHomePageState extends State<MyHomePage> {
         _locationBiasEnabled,
         (value) => _locationBiasEnabled = value,
         LocationField(
-          label: "Location Bias",
+          label: 'Location Bias',
           enabled: _locationBiasEnabled,
           value: _locationBias,
           onChanged: (bounds) {
@@ -502,7 +500,7 @@ class _MyHomePageState extends State<MyHomePage> {
         _locationRestrictionEnabled,
         (value) => _locationRestrictionEnabled = value,
         LocationField(
-          label: "Location Restriction",
+          label: 'Location Restriction',
           enabled: _locationRestrictionEnabled,
           value: _locationRestriction,
           onChanged: (bounds) {
@@ -526,13 +524,13 @@ class _MyHomePageState extends State<MyHomePage> {
             .map(_buildPredictionItem)
             .toList(growable: false),
       ),
-      Image(image: FlutterGooglePlacesSdk.assetPoweredByGoogleOnWhite),
+      const Image(image: FlutterGooglePlacesSdk.assetPoweredByGoogleOnWhite),
     ];
   }
 
   // ===== Search by Text =====
 
-  void _searchByText() async {
+  Future<void> _searchByText() async {
     if (_searchingByText) return;
 
     final hasContent = _searchByTextLastQuery?.isNotEmpty ?? false;
@@ -576,15 +574,15 @@ class _MyHomePageState extends State<MyHomePage> {
       // -- Text query
       TextFormField(
         onChanged: (value) => _searchByTextLastQuery = value,
-        decoration: InputDecoration(label: Text("Text Query")),
+        decoration: const InputDecoration(label: Text('Text Query')),
       ),
       // -- Included Type
       TextFormField(
         onChanged: (value) =>
             _searchByTextIncludedType = value.isEmpty ? null : value,
-        decoration: InputDecoration(
-          label: Text("Included Type"),
-          hintText: "e.g. restaurant",
+        decoration: const InputDecoration(
+          label: Text('Included Type'),
+          hintText: 'e.g. restaurant',
         ),
       ),
       // -- Max Result Count
@@ -594,16 +592,16 @@ class _MyHomePageState extends State<MyHomePage> {
         onChanged: (value) => _searchByTextMaxResults = value.isEmpty
             ? null
             : int.tryParse(value),
-        decoration: InputDecoration(label: Text("Max Results")),
+        decoration: const InputDecoration(label: Text('Max Results')),
       ),
       // -- Min Rating
       TextFormField(
-        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
         onChanged: (value) => _searchByTextMinRating = value.isEmpty
             ? null
             : double.tryParse(value),
-        decoration: InputDecoration(label: Text("Min Rating (0-5)")),
+        decoration: const InputDecoration(label: Text('Min Rating (0-5)')),
       ),
       // -- Open Now
       Row(
@@ -614,7 +612,7 @@ class _MyHomePageState extends State<MyHomePage> {
               setState(() => _searchByTextOpenNow = value ?? false);
             },
           ),
-          Text('Open Now'),
+          const Text('Open Now'),
         ],
       ),
       // -- Strict Type Filtering
@@ -626,14 +624,14 @@ class _MyHomePageState extends State<MyHomePage> {
               setState(() => _searchByTextStrictTypeFiltering = value ?? false);
             },
           ),
-          Text('Strict Type Filtering'),
+          const Text('Strict Type Filtering'),
         ],
       ),
       // -- Rank Preference
       DropdownButton<TextSearchRankPreference?>(
-        hint: Text("Rank Preference"),
+        hint: const Text('Rank Preference'),
         items: [
-          DropdownMenuItem(value: null, child: Text('None')),
+          const DropdownMenuItem(value: null, child: Text('None')),
           ...TextSearchRankPreference.values.map(
             (item) => DropdownMenuItem(value: item, child: Text(item.name)),
           ),
@@ -648,7 +646,7 @@ class _MyHomePageState extends State<MyHomePage> {
         _searchByTextLocationBiasEnabled,
         (value) => _searchByTextLocationBiasEnabled = value,
         LocationField(
-          label: "Location Bias",
+          label: 'Location Bias',
           enabled: _searchByTextLocationBiasEnabled,
           value: _searchByTextLocationBias,
           onChanged: (bounds) {
@@ -669,13 +667,13 @@ class _MyHomePageState extends State<MyHomePage> {
         children: (_searchByTextResults ?? [])
             .map(
               (place) => Padding(
-                padding: EdgeInsets.symmetric(vertical: 4),
+                padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       place.displayName?.text ?? place.name ?? 'N/A',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(place.address ?? ''),
                     if (place.rating != null) Text('Rating: ${place.rating}'),
@@ -691,7 +689,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // ===== Search Nearby =====
 
-  void _searchNearby() async {
+  Future<void> _searchNearby() async {
     if (_searchingNearby) return;
 
     setState(() {
@@ -737,7 +735,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           Flexible(
             child: TextFormField(
-              keyboardType: TextInputType.numberWithOptions(
+              keyboardType: const TextInputType.numberWithOptions(
                 signed: true,
                 decimal: true,
               ),
@@ -754,13 +752,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 }
               },
-              decoration: InputDecoration(label: Text("Center Lat")),
+              decoration: const InputDecoration(label: Text('Center Lat')),
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Flexible(
             child: TextFormField(
-              keyboardType: TextInputType.numberWithOptions(
+              keyboardType: const TextInputType.numberWithOptions(
                 signed: true,
                 decimal: true,
               ),
@@ -777,7 +775,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 }
               },
-              decoration: InputDecoration(label: Text("Center Lng")),
+              decoration: const InputDecoration(label: Text('Center Lng')),
             ),
           ),
         ],
@@ -791,15 +789,15 @@ class _MyHomePageState extends State<MyHomePage> {
           final radius = double.tryParse(value);
           if (radius != null) _searchNearbyRadius = radius;
         },
-        decoration: InputDecoration(label: Text("Radius (meters)")),
+        decoration: const InputDecoration(label: Text('Radius (meters)')),
       ),
       // -- Included Types
       TextFormField(
         onChanged: (value) =>
             _searchNearbyIncludedTypes = value.isEmpty ? null : value,
-        decoration: InputDecoration(
-          label: Text("Included Types"),
-          hintText: "e.g. restaurant,cafe",
+        decoration: const InputDecoration(
+          label: Text('Included Types'),
+          hintText: 'e.g. restaurant,cafe',
         ),
       ),
       // -- Max Result Count
@@ -809,13 +807,13 @@ class _MyHomePageState extends State<MyHomePage> {
         onChanged: (value) => _searchNearbyMaxResults = value.isEmpty
             ? null
             : int.tryParse(value),
-        decoration: InputDecoration(label: Text("Max Results")),
+        decoration: const InputDecoration(label: Text('Max Results')),
       ),
       // -- Rank Preference
       DropdownButton<NearbySearchRankPreference?>(
-        hint: Text("Rank Preference"),
+        hint: const Text('Rank Preference'),
         items: [
-          DropdownMenuItem(value: null, child: Text('None')),
+          const DropdownMenuItem(value: null, child: Text('None')),
           ...NearbySearchRankPreference.values.map(
             (item) => DropdownMenuItem(value: item, child: Text(item.name)),
           ),
@@ -838,20 +836,20 @@ class _MyHomePageState extends State<MyHomePage> {
         children: (_searchNearbyResults ?? [])
             .map(
               (place) => Padding(
-                padding: EdgeInsets.symmetric(vertical: 4),
+                padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       place.displayName?.text ?? place.name ?? 'N/A',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(place.address ?? ''),
                     if (place.rating != null) Text('Rating: ${place.rating}'),
                     if (place.types != null)
                       Text(
                         'Types: ${place.types!.map((t) => t.name).join(", ")}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     const Divider(thickness: 2),
                   ],
@@ -883,10 +881,19 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 /// Callback function with LatLngBounds
-typedef void ActionWithBounds(LatLngBounds);
+typedef ActionWithBounds = void Function(LatLngBounds);
 
 /// Location widget used to display and edit a LatLngBounds type
 class LocationField extends StatefulWidget {
+
+  /// Create a LocationField
+  const LocationField({
+    Key? key,
+    required this.label,
+    required this.enabled,
+    required this.value,
+    required this.onChanged,
+  }) : super(key: key);
   /// Label associated with this field
   final String label;
 
@@ -899,15 +906,6 @@ class LocationField extends StatefulWidget {
 
   /// Callback for when the value has changed by the user.
   final ActionWithBounds onChanged;
-
-  /// Create a LocationField
-  const LocationField({
-    Key? key,
-    required this.label,
-    required this.enabled,
-    required this.value,
-    required this.onChanged,
-  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _LocationFieldState();
@@ -940,7 +938,7 @@ class _LocationFieldState extends State<LocationField> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(5.0),
+      padding: const EdgeInsets.all(5.0),
       child: InputDecorator(
         decoration: InputDecoration(
           enabled: widget.enabled,
@@ -949,10 +947,10 @@ class _LocationFieldState extends State<LocationField> {
         ),
         child: Row(
           children: [
-            _buildField("NE/Lat", _ctrlNeLat),
-            _buildField("NE/Lng", _ctrlNeLng),
-            _buildField("SW/Lat", _ctrlSwLat),
-            _buildField("SW/Lng", _ctrlSwLng),
+            _buildField('NE/Lat', _ctrlNeLat),
+            _buildField('NE/Lng', _ctrlNeLng),
+            _buildField('SW/Lat', _ctrlSwLat),
+            _buildField('SW/Lng', _ctrlSwLng),
           ],
         ),
       ),
@@ -963,7 +961,7 @@ class _LocationFieldState extends State<LocationField> {
     return Flexible(
       child: TextFormField(
         enabled: widget.enabled,
-        keyboardType: TextInputType.numberWithOptions(
+        keyboardType: const TextInputType.numberWithOptions(
           signed: true,
           decimal: true,
         ),
@@ -980,8 +978,8 @@ class _LocationFieldState extends State<LocationField> {
   void _onValueChanged(TextEditingController ctrlNELat, String value) {
     final neLat = double.parse(ctrlNELat.value.text);
 
-    LatLngBounds bounds = LatLngBounds(
-      southwest: LatLng(lat: 0.0, lng: 0.0),
+    final LatLngBounds bounds = LatLngBounds(
+      southwest: const LatLng(lat: 0.0, lng: 0.0),
       northeast: LatLng(lat: neLat, lng: 0.0),
     );
 
@@ -994,16 +992,16 @@ class _LocationFieldState extends State<LocationField> {
 /// If the platform is web, the widget created is [SelectableText].
 /// Otherwise, it's a [Text].
 class WebSelectableText extends StatelessWidget {
-  /// The text to display.
-  ///
-  /// This will be null if a [textSpan] is provided instead.
-  final String data;
 
   /// Creates a web-selectable text widget.
   ///
   /// If the platform is web, the widget created is [SelectableText].
   /// Otherwise, it's a [Text].
   const WebSelectableText(this.data, {Key? key}) : super(key: key);
+  /// The text to display.
+  ///
+  /// This will be null if a [textSpan] is provided instead.
+  final String data;
 
   @override
   Widget build(BuildContext context) {

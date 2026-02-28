@@ -1,16 +1,11 @@
 import 'dart:ui_web';
-import 'package:web/web.dart' as web;
 
 import 'package:flutter/material.dart';
 import 'package:google_places_sdk_plus/google_places_sdk_plus.dart';
+import 'package:web/web.dart' as web;
 
 /// Widget used to display google place image. Used in web platforms
 class GooglePlacesImg extends StatelessWidget {
-  /// The photo metadata
-  final PhotoMetadata photoMetadata;
-
-  /// The photo fetch response
-  final FetchPlacePhotoResponse placePhotoResponse;
 
   /// Construct a google place img using metadata and response object
   const GooglePlacesImg({
@@ -18,6 +13,11 @@ class GooglePlacesImg extends StatelessWidget {
     required this.photoMetadata,
     required this.placePhotoResponse,
   }) : super(key: key);
+  /// The photo metadata
+  final PhotoMetadata photoMetadata;
+
+  /// The photo fetch response
+  final FetchPlacePhotoResponse placePhotoResponse;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class GooglePlacesImg extends StatelessWidget {
       _ => null,
     };
     if (imageUrl == null) {
-      return Text('Invalid image url!');
+      return const Text('Invalid image url!');
     }
 
     // ignore: undefined_prefixed_name

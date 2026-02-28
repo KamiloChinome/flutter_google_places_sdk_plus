@@ -1,6 +1,6 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:google_places_sdk_plus_http/place_parsing.dart';
 import 'package:google_places_sdk_plus_platform_interface/google_places_sdk_plus_platform_interface.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('placeFieldToApiName', () {

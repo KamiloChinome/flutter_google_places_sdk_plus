@@ -1,5 +1,5 @@
-import 'package:google_places_sdk_plus_platform_interface/src/types/autocomplete_predictions.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:google_places_sdk_plus_platform_interface/src/types/autocomplete_predictions.dart';
 
 part 'find_autocomplete_predictions_response.freezed.dart';
 

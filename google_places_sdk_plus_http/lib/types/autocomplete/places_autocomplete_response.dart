@@ -1,5 +1,7 @@
-import 'package:google_places_sdk_plus_http/types/autocomplete/places_autocomplete_status.dart';
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:google_places_sdk_plus_http/types/autocomplete/places_autocomplete_status.dart';
 
 import 'place_autocomplete_prediction.dart';
 

@@ -1,6 +1,6 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/containment.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/localized_text.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'area.freezed.dart';
 part 'area.g.dart';

@@ -1,6 +1,8 @@
+// ignore_for_file: non_constant_identifier_names
+
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:google_places_sdk_plus_platform_interface/google_places_sdk_plus_platform_interface.dart'
     as inter;
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'place_autocomplete_matched_substring.dart';
 import 'place_autocomplete_structured_format.dart';
@@ -12,7 +14,6 @@ part 'place_autocomplete_prediction.g.dart';
 /// Prediction result from google maps api.
 @freezed
 sealed class PlaceAutocompletePrediction with _$PlaceAutocompletePrediction {
-  const PlaceAutocompletePrediction._();
 
   /// Construct a [PlaceAutocompletePrediction] object.
   const factory PlaceAutocompletePrediction({
@@ -53,6 +54,11 @@ sealed class PlaceAutocompletePrediction with _$PlaceAutocompletePrediction {
     List<String>? types,
   }) = _PlacesAutocompletePrediction;
 
+  /// Parse a [PlaceAutocompletePrediction] from json data.
+  factory PlaceAutocompletePrediction.fromJson(Map<String, Object?> json) =>
+      _$PlaceAutocompletePredictionFromJson(json);
+  const PlaceAutocompletePrediction._();
+
   /// Create the interface-equivalent type [inter.AutocompletePrediction] from
   /// this instance.
   inter.AutocompletePrediction toInterface() {
@@ -64,8 +70,4 @@ sealed class PlaceAutocompletePrediction with _$PlaceAutocompletePrediction {
       fullText: description,
     );
   }
-
-  /// Parse a [PlaceAutocompletePrediction] from json data.
-  factory PlaceAutocompletePrediction.fromJson(Map<String, Object?> json) =>
-      _$PlaceAutocompletePredictionFromJson(json);
 }

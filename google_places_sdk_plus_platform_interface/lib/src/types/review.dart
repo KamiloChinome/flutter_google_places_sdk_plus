@@ -1,5 +1,5 @@
-import 'package:google_places_sdk_plus_platform_interface/src/types/author_attribution.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:google_places_sdk_plus_platform_interface/src/types/author_attribution.dart';
 
 part 'review.freezed.dart';
 part 'review.g.dart';

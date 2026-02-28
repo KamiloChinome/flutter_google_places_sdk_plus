@@ -1,5 +1,5 @@
-import 'package:google_places_sdk_plus_platform_interface/src/types/localized_text.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:google_places_sdk_plus_platform_interface/src/types/localized_text.dart';
 
 part 'content_block.freezed.dart';
 part 'content_block.g.dart';

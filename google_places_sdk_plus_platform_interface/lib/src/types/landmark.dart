@@ -1,6 +1,6 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/localized_text.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/spatial_relationship.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'landmark.freezed.dart';
 part 'landmark.g.dart';

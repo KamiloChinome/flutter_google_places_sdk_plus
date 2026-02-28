@@ -9,14 +9,14 @@ import 'dart:js_interop_unsafe';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_places_sdk_plus_platform_interface/google_places_sdk_plus_platform_interface.dart'
-    as inter;
-import 'package:google_places_sdk_plus_platform_interface/google_places_sdk_plus_platform_interface.dart';
-import 'package:google_places_sdk_plus_web/extension.dart' as ext;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:google_maps/google_maps.dart' as core;
 import 'package:google_maps/google_maps_places.dart' as places;
 import 'package:google_maps/google_maps_places.dart' hide PriceLevel;
+import 'package:google_places_sdk_plus_platform_interface/google_places_sdk_plus_platform_interface.dart'
+    as inter;
+import 'package:google_places_sdk_plus_platform_interface/google_places_sdk_plus_platform_interface.dart';
+import 'package:google_places_sdk_plus_web/extension.dart' as ext;
 import 'package:web/web.dart' as html;
 
 @JS('initMap')
@@ -60,15 +60,15 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
 
     _initMap = _doInit.toJS;
 
-    html.Element? scriptExist = html.window.document.querySelector(
+    final html.Element? scriptExist = html.window.document.querySelector(
       '#$_scriptId',
     );
     if (scriptExist != null) {
       _doInit();
     } else {
       final body = html.window.document.querySelector('body')!;
-      var src =
-          'https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&libraries=places&callback=initMap';
+      final src =
+          'https://maps.googleapis.com/maps/api/js?key=$apiKey&loading=async&libraries=places&callback=initMap';
       if (locale?.languageCode != null) {
         _language = locale?.languageCode;
       }
@@ -111,11 +111,10 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     inter.LatLngBounds? locationBias,
     inter.LatLngBounds? locationRestriction,
   }) async {
-    await _completer;
     if (locationRestriction != null) {
       // https://issuetracker.google.com/issues/36219203
       log(
-        "locationRestriction is not supported: https://issuetracker.google.com/issues/36219203",
+        'locationRestriction is not supported: https://issuetracker.google.com/issues/36219203',
       );
     }
 
@@ -159,8 +158,8 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     if (prediction == null) {
       return null;
     }
-    var mainText = prediction.mainText?.text ?? '';
-    var secondaryText = prediction.secondaryText?.text ?? '';
+    final mainText = prediction.mainText?.text ?? '';
+    final secondaryText = prediction.secondaryText?.text ?? '';
     return inter.AutocompletePrediction(
       distanceMeters: prediction.distanceMeters?.toInt() ?? 0,
       placeId: prediction.placeId,
@@ -237,14 +236,14 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     List<inter.PlaceField> fields,
   ) async {
     final fieldsMapped = fields
-        .map(this._mapField)
+        .map(_mapField)
         .nonNulls
         .toSet() // Distinct
         .map((str) => str.toJS)
         .toList(growable: false)
         .toJS;
 
-    final place = new places.Place(
+    final place = places.Place(
       PlaceOptions(id: placeId, requestedLanguage: _language),
     );
     final task =
@@ -433,7 +432,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
 
   String _getPhotoMetadataReference() {
     final num = _runningUid++;
-    return "id_${num.toString()}";
+    return 'id_${num.toString()}';
   }
 
   inter.LatLngBounds? _parseLatLngBounds(core.LatLngBounds? viewport) {
@@ -532,7 +531,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     int? maxWidth,
     int? maxHeight,
   }) async {
-    places.Photo? value = _photosCache[photoMetadata.photoReference];
+    final places.Photo? value = _photosCache[photoMetadata.photoReference];
     if (value == null) {
       throw PlatformException(
         code: 'API_ERROR_PHOTO',
@@ -549,7 +548,7 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
   /// Maps a list of [PlaceField]s to a [JSArray] of JS field-name strings.
   JSArray<JSString> _mapFields(List<inter.PlaceField> fields) {
     return fields
-        .map(this._mapField)
+        .map(_mapField)
         .nonNulls
         .toSet() // Distinct
         .map((str) => str.toJS)
@@ -572,7 +571,6 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     String? regionCode,
     bool? strictTypeFiltering,
   }) async {
-    await _completer;
 
     final request = SearchByTextRequest(
       textQuery: textQuery,
@@ -619,7 +617,6 @@ class FlutterGooglePlacesSdkWebPlugin extends FlutterGooglePlacesSdkPlatform {
     String? regionCode,
     int? maxResultCount,
   }) async {
-    await _completer;
 
     final restriction =
         core.CircleLiteral(

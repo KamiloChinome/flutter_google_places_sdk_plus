@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:google_places_sdk_plus_platform_interface/google_places_sdk_plus_platform_interface.dart';
 import 'package:google_places_sdk_plus_platform_interface/method_channel_google_places_sdk_plus.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 /// Tests for the Android plugin package.
 ///
@@ -15,7 +15,7 @@ void main() {
   const channelName = 'plugins.msh.com/google_places_sdk_plus';
 
   group('FlutterGooglePlacesSdkAndroid', () {
-    final channel = MethodChannel(channelName);
+    const channel = MethodChannel(channelName);
     final List<MethodCall> log = <MethodCall>[];
 
     setUp(() {

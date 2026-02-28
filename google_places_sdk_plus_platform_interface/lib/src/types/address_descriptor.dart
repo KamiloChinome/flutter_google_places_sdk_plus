@@ -1,6 +1,6 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/area.dart';
 import 'package:google_places_sdk_plus_platform_interface/src/types/landmark.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'address_descriptor.freezed.dart';
 part 'address_descriptor.g.dart';

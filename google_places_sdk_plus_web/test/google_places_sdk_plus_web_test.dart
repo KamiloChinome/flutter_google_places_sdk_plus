@@ -173,7 +173,7 @@ void main() {
           return;
         }
         await plugin.initialize(apiKey);
-        final origin = LatLng(lat: 48.8566, lng: 2.3522);
+        const origin = LatLng(lat: 48.8566, lng: 2.3522);
         final response = await plugin.findAutocompletePredictions(
           'Eiffel Tower',
           origin: origin,
@@ -211,7 +211,7 @@ void main() {
           return;
         }
         await plugin.initialize(apiKey);
-        final bounds = LatLngBounds(
+        const bounds = LatLngBounds(
           southwest: LatLng(lat: 48.0, lng: 2.0),
           northeast: LatLng(lat: 49.0, lng: 3.0),
         );
@@ -306,7 +306,7 @@ void main() {
           return;
         }
         await plugin.initialize(apiKey);
-        final invalidMetadata = PhotoMetadata(
+        const invalidMetadata = PhotoMetadata(
           photoReference: 'invalid_reference',
           width: 100,
           height: 100,

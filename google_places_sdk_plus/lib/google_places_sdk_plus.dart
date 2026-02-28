@@ -9,7 +9,7 @@ export 'package:google_places_sdk_plus_platform_interface/google_places_sdk_plus
 class FlutterGooglePlacesSdk {
   /// Construct a FlutterGooglePlacesSdk using the specific api key and locale
   FlutterGooglePlacesSdk(this._apiKey, {Locale? locale})
-    : this._locale = locale;
+    : _locale = locale;
 
   /// "Powered by google" image that should be used when background is white
   static const AssetImage assetPoweredByGoogleOnWhite =
