@@ -57,6 +57,37 @@ final nearby = await places.searchNearby(
 );
 ```
 
+## Place Photos
+
+`fetchPlacePhoto` returns a `FetchPlacePhotoResponse`, a sealed union with **two variants** depending on the platform:
+
+| Platform | Variant | Description |
+|----------|---------|-------------|
+| **iOS** | `FetchPlacePhotoResponse.image(Image)` | Raw image bytes (the iOS SDK returns `UIImage`, no URL available) |
+| **Android, Web, Desktop** | `FetchPlacePhotoResponse.imageUrl(String)` | Resolved photo URL |
+
+**You must handle both variants.** Using Freezed's `when` ensures compile-time safety:
+
+```dart
+final place = await places.fetchPlace(
+  placeId,
+  fields: [PlaceField.PhotoMetadatas],
+);
+
+final photoMetadata = place.place?.photoMetadatas?.first;
+if (photoMetadata != null) {
+  final response = await places.fetchPlacePhoto(photoMetadata);
+
+  // Handle both platform responses
+  final widget = response.when(
+    image: (image) => image,                          // iOS: direct Image widget
+    imageUrl: (url) => Image.network(url),            // Android/Web/Desktop: URL
+  );
+}
+```
+
+> **Common mistake:** If you only handle the `imageUrl` variant (e.g., using `CachedNetworkImage`), photos will fail on iOS. Always handle both cases.
+
 ## Web Usage
 
 When using web support, enable the Maps JavaScript API in Google Cloud:
