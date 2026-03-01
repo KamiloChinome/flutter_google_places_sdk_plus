@@ -1,3 +1,7 @@
+## 0.3.6
+
+* Fix: `rating` and `userRatingsTotal` still returned `0`/`0.0` on some places — changed check from `userRatingsTotal == 0` to direct value checks (`rating > 0`, `userRatingsTotal > 0`)
+
 ## 0.3.5
 
 * Fix: `rating` and `userRatingsTotal` returned `0` instead of `null` when a place has no ratings, causing inconsistency with Android
