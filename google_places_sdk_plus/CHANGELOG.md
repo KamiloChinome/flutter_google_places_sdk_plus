@@ -1,3 +1,7 @@
+## 0.5.8
+
+* Fix: iOS `rating` and `userRatingsTotal` could still return `0`/`0.0` on some places — uses direct value checks now (updated `google_places_sdk_plus_ios` to `0.3.6`)
+
 ## 0.5.7
 
 * Fix: iOS `rating` and `userRatingsTotal` returned `0` instead of `null` when a place has no ratings (updated `google_places_sdk_plus_ios` to `0.3.5`)
