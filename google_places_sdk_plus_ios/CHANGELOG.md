@@ -1,3 +1,7 @@
+## 0.3.5
+
+* Fix: `rating` and `userRatingsTotal` returned `0` instead of `null` when a place has no ratings, causing inconsistency with Android
+
 ## 0.3.4
 
 * Use UUID for photo references instead of incrementing counter

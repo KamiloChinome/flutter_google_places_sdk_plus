@@ -1,3 +1,7 @@
+## 0.5.7
+
+* Fix: iOS `rating` and `userRatingsTotal` returned `0` instead of `null` when a place has no ratings (updated `google_places_sdk_plus_ios` to `0.3.5`)
+
 ## 0.5.6
 
 * Document per-platform field availability in README
